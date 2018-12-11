@@ -1,0 +1,126 @@
+##-----------------------------------------------------------------------------
+## xroe by Xilinx
+## Welcome to the Radio Over Ethernet demonstrator. 
+##-----------------------------------------------------------------------------
+
+##-----------------------------------------------------------------------------
+## Scripts launched at BOOT. 
+##-----------------------------------------------------------------------------
+# - xroe-auto-start            : Startup daemon. Launches xroe-startup.sh
+#   - /usr/bin/xroe-startup.sh  : Checks for runtime manager script on SDCard, 
+#                                 else launches default in /usr/bin
+#     - /usr/bin/runXroe.bash     : Example runtime manager script. This can
+#                                   be adapted to suit the needs of your 
+#                                   system. Stop this executing using :
+mkdir /var/run/media/mmcblk0p1/xroe
+##-----------------------------------------------------------------------------
+
+##-----------------------------------------------------------------------------
+## To make modifications to the startup script and app. Create the following
+## directory and copy these files.
+## /usr/bin/runXroe.bash contains bash examples for subsystem interaction.
+## PERL and Python are also installed, which can be easier to use.
+##-----------------------------------------------------------------------------
+mkdir /var/run/media/mmcblk0p1/xroe
+cp /usr/bin/runXroe.bash           /var/run/media/mmcblk0p1/xroe/.
+cp /usr/bin/xroe-ptp4lsyncE.cfg    /var/run/media/mmcblk0p1/xroe/.
+cp /usr/bin/xroe-app               /var/run/media/mmcblk0p1/xroe/.
+sync
+
+##-----------------------------------------------------------------------------
+## Radio Address Map
+## acc=AccessType
+## bof=BitOffset
+## bwi=BitWidth
+## aof=AddressOffset
+## def=Default
+## doc=Documentation
+##-----------------------------------------------------------------------------
+
+ radio_id            : {acc: ro, bof: 0, bwi: 32, aof: 0x0000, def: 0x00120001, doc: 'Radio ID tag'}
+
+ gpio_cdc_ledmode2   : {acc: rw  bof: 0, bwi: 1,  aof: 0x0010, def: 0,          doc: 'Enable LED mode 2'}
+ gpio_cdc_ledgpio    : {acc: rw  bof: 4, bwi: 2,  aof: 0x0010, def: 0,          doc: 'Set LED'}
+ gpio_cdc_dipstatus  : {acc: ro, bof: 0, bwi: 8,  aof: 0x0014, def: 0,          doc: 'Read DIP signal status'}
+
+ radio_source_enable : {acc: rw  bof: 0, bwi: 1,  aof: 0x002C, def: 1,          doc: 'Enable the radio generator'}
+ radio_sink_enable   : {acc: rw  bof: 1, bwi: 1,  aof: 0x002C, def: 1,          doc: 'Enable the radio error check mechanism'}
+ 
+ app_scratch_reg_0   : {acc: rw, bof: 0, bwi: 16, aof: 0x0050, def: 0,          doc: 'Application message passing reg'}
+ app_scratch_reg_1   : {acc: rw, bof: 0, bwi: 16, aof: 0x0054, def: 0,          doc: 'Application message passing reg'}
+ app_scratch_reg_2   : {acc: rw, bof: 0, bwi: 16, aof: 0x0058, def: 0,          doc: 'Application message passing reg'}
+ app_scratch_reg_3   : {acc: rw, bof: 0, bwi: 16, aof: 0x005C, def: 0,          doc: 'Application message passing reg'}
+
+##-----------------------------------------------------------------------------
+## ZCU102 DIP Switches (PL_DIP SW13)
+##-----------------------------------------------------------------------------
+         :                ON        :              OFF
+DIP0 (8) : Loopback radio on        : Loopback radio off
+DIP1 (7) :
+DIP2 (6) :
+DIP3 (5) :
+DIP4 (4) : Use DHCP for 10/100/1000 : Set fixed IP address for eth0.
+         : connection eth0.         : Master : 192.168.10.100
+         :                          : Slave  : 192.168.10.120
+DIP5 (3) : Enable PTP at boot       : 
+DIP6 (2) : Board should act as a    : Board should act as a
+         : remote slave             : master device
+DIP7 (1) : LED mode 2               : LED mode 1
+
+DEMO Setup with PTP running. Connect to the Slave using DHCP.
+         : MASTER :  SLAVE  :
+DIP0 (8) :  |* |  :   | *|  :
+DIP1 (7) :  | *|  :   | *|  :
+DIP2 (6) :  | *|  :   | *|  :
+DIP3 (5) :  | *|  :   | *|  :
+DIP4 (4) :  | *|  :   |* |  :
+DIP5 (3) :  |* |  :   |* |  :
+DIP6 (2) :  | *|  :   |* |  :
+DIP7 (1) :  | *|  :   | *|  :
+
+##-----------------------------------------------------------------------------
+## ZCU102 LED
+## Mode 1/2 are selected using DIP7, see above.
+##-----------------------------------------------------------------------------
+LED :        Mode 1          :        Mode 2
+ 0  : Block lock             : gpio_cdc_xxv_loopback
+ 1  : gpio_cdc_ledgpio[0]    : radio_cdc_loopback
+ 2  : gpio_cdc_ledgpio[1]    : radio_cdc_enable
+ 3  : GT refclk toggle       : radio_cdc_error
+ 4  : XXV 75m clock toggle   : radio_cdc_status
+ 5  : AXI4 Lite clock toggle : 1’d0
+ 6  : TX clock toggle        : 1’d1
+ 7  : RX clock toggle        : 1’d1
+
+##-----------------------------------------------------------------------------
+## xroe-app
+##-----------------------------------------------------------------------------
+## Try the help using 
+xroe-app -help
+
+##-----------------------------------------------------------------------------
+## PTP
+##-----------------------------------------------------------------------------
+##  Starting the Master
+ptp4l -m -A -i eth1 &
+##  Starting the Slave
+ptp4l -m -A -i eth1 -f ${XROEROOTDIR}/xroe-ptp4lsyncE.cfg -s &
+
+##-----------------------------------------------------------------------------
+## Add and Remove IP address, Manage MAC address
+##-----------------------------------------------------------------------------
+ip addr add 192.168.99.44/24 dev eth1
+ip addr del 192.168.99.44/24 dev eth1
+ifconfig eth0 hw ether 02:01:02:03:04:08
+
+## Editing files on the SDCard.
+## 
+## Flush the SDCard. Ensure you Unmount the SDCard or force a flush using
+sync
+
+##-----------------------------------------------------------------------------
+## Check logs, use tail. You can also use watch (runs a commmand every -n secs)
+## and build a custom devmem string. Very useful for debug.
+##-----------------------------------------------------------------------------
+tail –n 50 /var/log/messages -f
+watch -n 1 " ifconfig | grep 'X packets' ; devmem 0xa000c000 ; devmem 0xa000c004 ; devmem 0xa000c008 ; devmem 0xa000c00c;"

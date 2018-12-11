@@ -1,0 +1,14 @@
+/include/ "system-conf.dtsi"
+/ {
+    model = "ZynqMP ZCU102 Jamjam";
+    compatible = "xlnx,zynqmp-zcu102-revB", "xlnx,zynqmp-zcu102", "xlnx,zynqmp";
+    chosen {
+       bootargs = "earlycon clk_ignore_unused cpuidle.off=1 uio_pdrv_genirq.of_id=generic-uio";
+    };
+};
+&datapath_xxv_eth_subs_xxv_wrap_xxv_ethernet_0 {
+    axistream-connected = <&datapath_xxv_eth_subs_subs_2_arm_mm_dma_axi_dma_0>;
+};
+&datapath_framer_datapath_roe_radio_ctrl_0 {
+    compatible = "generic-uio";
+};
