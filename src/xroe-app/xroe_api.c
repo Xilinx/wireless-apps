@@ -18,6 +18,7 @@
 /***************************** Include Files *********************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -25,6 +26,9 @@
 #include <syslog.h>
 #include <sys/ioctl.h>
 #include <roe_framer_ctrl.h>
+
+/* Maximum allowed length of sysfs path */
+#define XROE_MAX_SYSPATH_LENGTH 1024
 
 /* IOCTL commands */
 /* Use 0xF5 as magic number */
@@ -207,53 +211,48 @@ int IP_API_Write_Register(int addr, unsigned int Write, int Mask, int Offset)
 
 /*****************************************************************************/
 /**
+* Reads a value from the stats sysfs entries.
+* Reads 32-bits from sysfs to resp.
 *
-* Reads 32-bits from the stats address space.
-* Reads 32-bits from the address given and writes them into pRead.
-*
-* @param [in]  	addr   Address in stats address space (0 base) to read from
-* @param [out] 	pRead  Pointer to use to store output
+* @param [in]  name   Path in TrafGen sysfs to read from
+* @param [in]  resp   Pointer to use to store output
 *
 * @return
 *		- 0 on success
-*		- EIO on device open failure
-*		- EFAULT on ioctl() failure
+*		- -1 on device open failure
+*		- read() return value on read() failure
 *
 ******************************************************************************/
-int STATS_API_Read_Register(int addr, unsigned int *pRead)
+int STATS_SYSFS_API_Read(const char *name, char *resp)
 {
-	int fd = 0;
-	unsigned int buf;
-	int ret = 0;
-	struct ioctl_arguments args;
+	int fd;
+    int w;
+	char buff[1024];
+	char syspath[XROE_MAX_SYSPATH_LENGTH] = "/sys/kernel/xroe/stats/";
+	int ret = -1;
+	
+	strncat(syspath, name, XROE_MAX_SYSPATH_LENGTH-strlen(syspath));
+	fd = open(syspath, O_RDONLY);
 
-	fd = open("/dev/xroe/stats", O_RDONLY);
-
-	if(fd>0)
+	if (fd>0)
 	{
-		args.offset = (uint32_t *)&addr;
-		args.value = (uint32_t *)&buf;
-		
-		ret = ioctl(fd, XROE_FRAMER_IOGET, &args);
-		
-		if (!ret)
+		w = read(fd, buff, sizeof(buff));
+		if (w)
 		{
-			*pRead = buf;
+			ret = 0;
+			strncpy(resp, buff, w);
 		}
 		else
 		{
-			ret = EFAULT;
+			ret = errno;
 		}
 
 		close(fd);
 	}
-	else
-	{
-		ret = EIO;
-	}
 
 	return ret;
 }
+
 
 /*****************************************************************************/
 /**
@@ -351,156 +350,94 @@ int FRAMER_API_Deframer_Restart(int restart)
 
 /*****************************************************************************/
 /**
-* Reads bytes from anywhere in the radio_ctrl address space.
-* Reads bytes from the address given and writes them into pRead.
+* Reads a value from the Traffic Generator sysfs entries.
+* Reads 32-bits from sysfs to resp.
 *
-* @param [in]  addr   Address in radio_ctrl address space (0 base) to read from
-* @param [out] pRead  Pointer to use to store output
-* @param [in]  length Number of bytes to read
-*
-* @return     	
-*		- 0 on success
-*		- EIO on device open failure
-*		- EFAULT on pread() failure
-*
-******************************************************************************/
-int RADIO_CTRL_API_Read(int addr, uint8_t *pRead, int length)
-{
-	int fd=0;
-	int read = 0;
-	int ret = 0;
-
-	fd=open("/dev/xroe/radio_ctrl", O_RDONLY);
-
-	if(fd>0)
-	{
-		read = pread(fd, pRead, length, addr);
-		if(!read)
-		{
-			ret = EFAULT;
-		}
-
-		close(fd);
-	}
-	else
-	{
-		ret = EIO;
-	}
-
-	return ret;
-}
-
-/*****************************************************************************/
-/**
-* Writes bytes to anywhere in the radio_ctrl address space.
-* Writes length bytes from pWrite to addr.
-*
-* @param [in]	addr   Address in radio_ctrl address space (0 base) to write to
-* @param [in]	pWrite Pointer to read from
-* @param [in]	length Number of bytes to write
-*
-* @return		
-*		- 0 on success
-*		- EIO on device open failure
-*		- EFAULT on pwrite() failure
-*
-******************************************************************************/
-int RADIO_CTRL_API_Write(int addr, uint8_t *pWrite, int length)
-{
-	int fd=0;
-	int write = 0;
-	int ret = 0;
-	fd=open("/dev/xroe/radio_ctrl", O_WRONLY);
-
-	if(fd>0)
-	{
-		write = pwrite(fd, pWrite, length, addr);
-		if(!write)
-		{
-			ret = EFAULT;
-		}
-
-		close(fd);
-	}
-	else
-	{
-		ret = EIO;
-	}
-
-	return ret;
-}
-
-/*****************************************************************************/
-/**
-* Reads 32-bits from anywhere in the radio_ctrl address space.
-* Reads 32-bits from addr to pRead, shifted and masked as per 
-* Offset and Mask.
-*
-* @param [in]  addr   Address in radio_ctrl address space (0 base) to read from
-* @param [in]  pRead  Pointer to use to store output
-* @param [in]  Mask   Mask to use to mask output before shifting
-* @param [in]  Offset Number of bits to shift output down by after masking
+* @param [in]  name   Path in TrafGen sysfs to read from
+* @param [in]  resp   Pointer to use to store output
 *
 * @return
 *		- 0 on success
-*		- EIO on device open failure
-*		- EFAULT on pread() failure
+*		- -1 on device open failure
+*		- read() return value on read() failure
 *
 ******************************************************************************/
-int RADIO_CTRL_API_Read_Register(int addr, unsigned int *pRead, int Mask, int Offset)
+int TRAFGEN_SYSFS_API_Read(const char *name, char *resp)
 {
-	int buf;
-	int ret = 0;
+	int fd;
+    int w;
+	char buff[1024];
+	// char syspath[XROE_MAX_SYSPATH_LENGTH] = "/sys/devices/platform/amba_pl@0/a0060000.roe_radio_ctrl/";
 
-	ret = RADIO_CTRL_API_Read(addr, (uint8_t *)&buf, sizeof(buf));
-	if(!ret)
+	char syspath[XROE_MAX_SYSPATH_LENGTH] = "/sys/kernel/traffic/";
+	int ret = -1;
+	
+	strncat(syspath, name, XROE_MAX_SYSPATH_LENGTH - strlen(syspath));
+
+	fd = open(syspath, O_RDONLY);
+
+	if (fd>0)
 	{
-		*pRead = (buf & Mask) >> Offset;;
+		w = read(fd, buff, sizeof(buff));
+		if (w)
+		{
+			ret = 0;
+			strncpy(resp, buff, w);
+		}
+		else
+		{
+			ret = errno;
+		}
+
+		close(fd);
 	}
 
 	return ret;
 }
+
 
 /*****************************************************************************/
 /**
+* Writes a value to the Traffic Generator sysfs entries.
+* Writes to sysfs from val.
 *
-* Writes 32-bits to anywhere in the radio_ctrl address space.
-* Performs a Read/Modify/Write of 32-bits from pWrite to addr,
-* shifted and masked as per Offset and Mask.
+* @param [in]  name   Path in TrafGen sysfs to write to
+* @param [in]  val    Pointer to read from
 *
-* @param [in]	addr   Address in radio_ctrl address space (0 base) to write to
-* @param [in]	value  Value to write
-* @param [in]	Mask   Mask to use to mask input after shifting
-* @param [in]	Offset Number of bits to shift input up by before masking
-*
-* @return		
+* @return
 *		- 0 on success
-*		- EIO on device open failure
-*		- EFAULT on pwrite() failure
+*		- -1 on device open failure
+*		- write() return value on write() failure
 *
 ******************************************************************************/
-int RADIO_CTRL_API_Write_Register(int addr, unsigned int value, int Mask, int Offset)
+int TRAFGEN_SYSFS_API_Write(const char *name, char *val)
 {
-	unsigned int ReadRegisterValue = 0, WriteRegisterValue = 0, Delta = 0, Buffer = 0;
-	int ret = 0;
-	int WorkingAddr = 0;
+	int fd;
+    int w;
+	char syspath[XROE_MAX_SYSPATH_LENGTH] = "/sys/kernel/traffic/";
+	int ret = -1;
+	
+	strncat(syspath, name, XROE_MAX_SYSPATH_LENGTH-strlen(syspath));
+	fd = open(syspath, O_RDONLY);
 
-	WorkingAddr = addr;
-	ret = RADIO_CTRL_API_Read_Register(WorkingAddr, &ReadRegisterValue, 0xffffffff, 0);
-	printf("ReadRegisterValue: %d\n", ReadRegisterValue);
-
-	if(!ret)
+	if (fd>0)
 	{
-		Buffer = (value << Offset);
-		WriteRegisterValue = ReadRegisterValue&~Mask;
-		Delta = Buffer&Mask;
-		WriteRegisterValue |= Delta;
-		printf("WriteRegisterValue: %d\n", WriteRegisterValue);
-		ret = RADIO_CTRL_API_Write(WorkingAddr, (uint8_t *)&WriteRegisterValue, sizeof(WriteRegisterValue));
+		w = write(fd, val, sizeof(val));
+		if (w)
+		{
+			ret = 0;
+		}
+		else
+		{
+			ret = errno;
+		}
+
+		close(fd);
 	}
 
 	return ret;
 }
+
 
 /*****************************************************************************/
 /**

@@ -35,7 +35,7 @@
 /**
  * RADIO_MAX_COMMANDS Number of commands handled by the radio_ctrl module.
  */
-#define RADIO_MAX_COMMANDS 9
+#define RADIO_MAX_COMMANDS 7
 
 /**
  * MAX_NUMBER_OF_ANTENNAS Number of antennae supported by the radio_ctrl module.
@@ -52,8 +52,6 @@ int radio_ctrl_status_func(int argc, char **argv, char *resp);
 int radio_ctrl_loopback_en_func(int argc, char **argv, char *resp);
 int radio_ctrl_loopback_dis_func(int argc, char **argv, char *resp);
 int radio_ctrl_gui_func(int argc, char **argv, char *resp);
-int radio_ctrl_peek_func(int argc, char **argv, char *resp);
-int radio_ctrl_poke_func(int argc, char **argv, char *resp);
 
 /**
  * radio_ctrl_cmds The commands handled by the radio_ctrl module.
@@ -66,8 +64,6 @@ commands_t radio_ctrl_cmds[RADIO_MAX_COMMANDS] = {
 	{"loopback_dis", RADIO_CTRL_LOOPBACK_DIS_STR, radio_ctrl_loopback_dis_func},
 	{"id", RADIO_CTRL_RADIO_ID_STR, radio_ctrl_radio_id_func},
 	{"gui", RADIO_CTRL_GUI_STR, radio_ctrl_gui_func},
-	{"peek", RADIO_CTRL_PEEK_STR, radio_ctrl_peek_func},
-	{"poke", RADIO_CTRL_POKE_STR, radio_ctrl_poke_func},
 	/* Insert commands here */
 	/* Keep this last - insert commands above */
 	{NULL, NULL, NULL}
@@ -160,7 +156,7 @@ int radio_ctrl_gui_func(int argc, char **argv, char *resp)
 
 	else
 	{
-		str += sprintf(str, "/dev/xroe/radio_ctrl not opened\n");
+		str += sprintf(str, "/sys/kernel/traffic not opened gui read - radio_ctrl_gui_func\n");
 	}
 
 
@@ -188,11 +184,11 @@ int radio_ctrl_loopback_en_func(int argc, char **argv, char *resp)
 	int ret = 0;
 	char *str = resp;
 
-	ret = RADIO_CTRL_API_Write_Register(RADIO_CDC_LOOPBACK_ADDR, 1, RADIO_CDC_LOOPBACK_MASK, RADIO_CDC_LOOPBACK_OFFSET);
+	ret = TRAFGEN_SYSFS_API_Write("radio_loopback", "enabled");
 
 	if(ret)
 	{
-		str += sprintf(str, "/dev/xroe/radio_ctrl not opened\n");
+		str += sprintf(str, "Error writing to xroe_traffic_gen/radio_loopback\n");
 	}
 
 	return 0;
@@ -218,11 +214,11 @@ int radio_ctrl_loopback_dis_func(int argc, char **argv, char *resp)
 	int ret = 0;
 	char *str = resp;
 
-	ret = RADIO_CTRL_API_Write_Register(RADIO_CDC_LOOPBACK_ADDR, 0, RADIO_CDC_LOOPBACK_MASK, RADIO_CDC_LOOPBACK_OFFSET);
+	ret = TRAFGEN_SYSFS_API_Write("radio_loopback", "disabled");
 
 	if(ret)
 	{
-		str += sprintf(str, "/dev/xroe/radio_ctrl not opened\n");
+		str += sprintf(str, "Error writing to xroe_traffic_gen/radio_loopback\n");
 	}
 
 	return 0;
@@ -273,7 +269,7 @@ int radio_ctrl_status_func(int argc, char **argv, char *resp)
 
 	else
 	{
-		str += sprintf(str, "/dev/xroe/radio_ctrl not opened\n");
+		str += sprintf(str, "/sys/kernel/traffic not opened radio_ctrl_status_func\n");
 	}
 
 	return 0;
@@ -298,17 +294,16 @@ int radio_ctrl_radio_id_func(int argc, char **argv, char *resp)
 {
 	int read = 0;
 	char *str = resp;
-	unsigned int radioIDTag = 0;
+	char buff[256];
 
-	read = RADIO_CTRL_API_Read_Register(RADIO_ID_ADDR, &radioIDTag, RADIO_ID_MASK, RADIO_ID_OFFSET);
+	read = TRAFGEN_SYSFS_API_Read("radio_id", buff);
 	if(!read)
 	{
-		str += sprintf(str, "\nRADIO_ID: 0x%08x\n", radioIDTag);
+		strncat(str, buff, 255);
 	}
-
 	else
 	{
-		str += sprintf(str, "/dev/xroe/radio_ctrl not opened\n");
+		str += sprintf(str, "/sys/kernel/traffic/ not opened radio_ctrl_radio_id_func\n");
 	}
 
 	return 0;
@@ -342,94 +337,6 @@ int radio_ctrl_help_func(int argc, char **argv, char *resp)
 	}
 	return 0;
 }
-
-/*****************************************************************************/
-/**
-*
-* Returns the 32-bits at the given memory address.
-* 
-*
-* @param [in]	argc   Number of string arguments.
-* @param [in]	argv   Array of strings containg arguments.
-* @param [out]	resp   Pointer to string to place response text in.
-*
-* @return
-*		- 0
-*
-******************************************************************************/
-int radio_ctrl_peek_func(int argc, char **argv, char *resp)
-{
-	int buf;
-	int addr;
-	int read = 0;
-	char *str = resp;
-
-	if(argc == 0)
-	{
-		sprintf(str, "\t%s", RADIO_CTRL_PEEK_STR);
-		return(1);
-	}
-
-	addr = strtol(argv[0], NULL, 0);
-
-	read = RADIO_CTRL_API_Read(addr, (uint8_t *)&buf, sizeof(buf));
-	if(!read)
-	{
-		str += sprintf(str, "peek: 0x%08x : 0x%08x\n", addr, buf);
-	}
-	else
-	{
-		str += sprintf(str, "radio_ctrl peek 0x%08x: error %d\n", addr, read);
-	}
-
-	return 0;
-}
-
-/*****************************************************************************/
-/**
-*
-* Writes the 32-bits given to the given memory address.
-* 
-*
-* @param [in]	argc   Number of string arguments.
-* @param [in]	argv   Array of strings containg arguments.
-* @param [out]	resp   Pointer to string to place response text in.
-*
-* @return
-*		- 0
-*
-******************************************************************************/
-int radio_ctrl_poke_func(int argc, char **argv, char *resp)
-{
-	int buf;
-	int addr;
-	int write = 0;
-	char *str = resp;
-
-	if(argc < 2)
-	{
-		sprintf(str, "\t%s", RADIO_CTRL_POKE_STR);
-		return(1);
-	}
-
-	addr = strtol(argv[0], NULL, 0);
-	buf = strtol(argv[1], NULL, 0);
-
-	str += sprintf(str, "addr: 0x%08x, value: 0x%08x\n", addr, buf);
-
-	write = RADIO_CTRL_API_Write(addr, (uint8_t *)&buf, sizeof(buf));
-	if(!write)
-	{
-		str += sprintf(str, "poke: 0x%08x : 0x%08x\n", addr, buf);
-	}
-	else
-	{
-		str += sprintf(str, "radio_ctrl poke 0x%08x: error %d\n", addr, write);
-	}
-
-	return 0;
-}
-
 
 /*****************************************************************************/
 /**
@@ -485,33 +392,88 @@ int radio_ctrl_func(int argc, char **argv, char *resp)
 * 
 *
 * @return
-*		- Return value of RADIO_CTRL_API_Read_Register() on error.
+*		- Return value of TRAFGEN_SYSFS_API_Read() on error.
 *		- Return value of IP_API_Read_Register() on error.
 *		- Return value of RADIO_CTRL_CalulateBufStateLatency() on error.
-*		- Return value of RADIO_CTRL_API_Read_Register() otherwise.
+*		- Return value of TRAFGEN_SYSFS_API_Read() otherwise.
 *
+/sys/kernel/traffic not opened gui read - radio_ctrl_gui_func
+root@om0_pl00:~# find /sys/kernel/traffic
+/sys/kernel/traffic
+/sys/kernel/traffic/radio_gpio_cdc_ledmode2
+/sys/kernel/traffic/radio_cdc_loopback
+/sys/kernel/traffic/radio_gpio_cdc_ledgpio
+/sys/kernel/traffic/radio_source_enable
+/sys/kernel/traffic/radio_sw_trigger
+/sys/kernel/traffic/radio_cdc_error_127_96
+/sys/kernel/traffic/radio_app_scratch_reg_2
+/sys/kernel/traffic/radio_timeout_status
+/sys/kernel/traffic/radio_cdc_error_31_0
+/sys/kernel/traffic/radio_app_scratch_reg_0
+/sys/kernel/traffic/radio_sink_enable
+/sys/kernel/traffic/radio_timeout_value
+/sys/kernel/traffic/fram_pause_data_size
+/sys/kernel/traffic/radio_cdc_error
+/sys/kernel/traffic/radio_cdc_error_95_64
+/sys/kernel/traffic/radio_cdc_status_127_96
+/sys/kernel/traffic/radio_cdc_status_95_64
+/sys/kernel/traffic/radio_timeout_enable
+/sys/kernel/traffic/radio_cdc_error_63_32
+/sys/kernel/traffic/radio_cdc_status
+/sys/kernel/traffic/radio_cdc_status_63_32
+/sys/kernel/traffic/radio_id
+/sys/kernel/traffic/radio_gpio_cdc_dipstatus
+/sys/kernel/traffic/fram_packet_data_size
+/sys/kernel/traffic/radio_app_scratch_reg_3
+/sys/kernel/traffic/radio_cdc_enable
+/sys/kernel/traffic/radio_cdc_status_31_0
+/sys/kernel/traffic/radio_app_scratch_reg_1
+
 ******************************************************************************/
 int radio_ctrl_update_values(void)
 {
 	int ret = -1;
 	int i;
+	char buff[256];
+	unsigned int ant_error[4];
+
 	AntennasStatus.NumOfAntennas = MAX_NUMBER_OF_ANTENNAS; // hardcoded "8" for the Demo
 
-	ret = RADIO_CTRL_API_Read_Register(RADIO_CDC_ENABLE_ADDR, &RadioStatus.Enable, RADIO_CDC_ENABLE_MASK, RADIO_CDC_ENABLE_OFFSET);
-	if(!ret)
-	{
-		ret = RADIO_CTRL_API_Read_Register(RADIO_CDC_ERROR_ADDR, &RadioStatus.Error, RADIO_CDC_ERROR_MASK, RADIO_CDC_ERROR_OFFSET);
-	}
-	if(!ret)
-	{
-		ret = RADIO_CTRL_API_Read_Register(RADIO_CDC_STATUS_ADDR, &RadioStatus.Status, RADIO_CDC_STATUS_MASK, RADIO_CDC_STATUS_OFFSET);
-	}
-	if(!ret)
-	{
-		ret = RADIO_CTRL_API_Read_Register(RADIO_CDC_LOOPBACK_ADDR, &RadioStatus.Loopback, RADIO_CDC_LOOPBACK_MASK, RADIO_CDC_LOOPBACK_OFFSET);
-	}
 
+	ret = TRAFGEN_SYSFS_API_Read("radio_source_enable", buff);
+	if(!ret)
+	{
+		RadioStatus.Enable = strtoul(buff, NULL, 0);
 
+		ret = TRAFGEN_SYSFS_API_Read("radio_cdc_error_31_0", buff);
+	}
+	if(!ret)
+	{
+		RadioStatus.Error = strtoul(buff, NULL, 0);
+
+		ret = TRAFGEN_SYSFS_API_Read("radio_cdc_status_31_0", buff);
+	}
+	if(!ret)
+	{
+		RadioStatus.Status = strtoul(buff, NULL, 0);
+
+		ret = TRAFGEN_SYSFS_API_Read("radio_cdc_loopback", buff);
+	}
+	if(!ret)
+	{
+		RadioStatus.Loopback = strtoul(buff, NULL, 0);
+
+		ret = TRAFGEN_SYSFS_API_Read("radio_cdc_error_31_0", buff);
+	}
+	if(!ret)
+	{
+		ant_error[0] = strtoul( buff, NULL, 0);
+		ant_error[1] = strtoul( "0x0", NULL, 0);
+		ant_error[2] = strtoul( "0x0", NULL, 0);
+		ant_error[3] = strtoul( "0x0", NULL, 0);
+
+	}
+	
 	if(!ret)
 	{
 		for(i=0; i<AntennasStatus.NumOfAntennas; i++)
@@ -531,7 +493,7 @@ int radio_ctrl_update_values(void)
 			}
 			if(!ret)
 			{
-				ret = RADIO_CTRL_API_Read_Register(RADIO_CDC_ERROR_31_0_ADDR, &AntennasStatus.Antenna[i].CheckError, RADIO_CDC_ERROR_31_0_MASK, RADIO_CDC_ERROR_31_0_OFFSET + i);
+				AntennasStatus.Antenna[i].CheckError = (ant_error[i/32] & 1<<(i%32)) >> (i%32);
 			}
 			if(!ret)
 			{
@@ -546,7 +508,11 @@ int radio_ctrl_update_values(void)
 
 	if(!ret)
 	{
-		ret = RADIO_CTRL_API_Read_Register(RADIO_CDC_LOOPBACK_ADDR, &RadioStatus.Loopback, RADIO_CDC_LOOPBACK_MASK, RADIO_CDC_LOOPBACK_OFFSET);
+		ret = TRAFGEN_SYSFS_API_Read("radio_cdc_loopback", buff);
+		if(!ret)
+		{		
+			RadioStatus.Loopback = strtoul(buff, NULL, 0);
+		}
 	}
 
 	return ret;

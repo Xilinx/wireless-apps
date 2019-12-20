@@ -34,7 +34,7 @@
 /**
  * STATS_MAX_COMMANDS Number of commands handled by the stats module.
  */
-#define STATS_MAX_COMMANDS 10
+#define STATS_MAX_COMMANDS 8
 
 /**
  * total_packets_struct Totals packets count.
@@ -77,7 +77,6 @@ static stats_struct Stats;
 
 /************************** Function Prototypes ******************************/
 int stats_help_func(int argc, char **argv, char *resp);
-int stats_hw_func(int argc, char **argv, char *resp);
 int stats_sw_func(int argc, char **argv, char *resp);
 int stats_user_func(int argc, char **argv, char *resp);
 int stats_ctrl_func(int argc, char **argv, char *resp);
@@ -94,7 +93,6 @@ commands_t stats_cmds[STATS_MAX_COMMANDS] = {
 	/* Keep this first */
 	{ "help", STATS_HELP_STR, stats_help_func },
 	/* Insert commands here */
-	{ "hw", STATS_HW_STR, stats_hw_func },
 	{ "sw", STATS_SW_STR, stats_sw_func },
 	{ "user", STATS_USER_STR, stats_user_func },
 	{ "control", STATS_CTRL_STR, stats_ctrl_func },
@@ -104,51 +102,6 @@ commands_t stats_cmds[STATS_MAX_COMMANDS] = {
 	/* Keep this last - insert commands above */
 	{ NULL, NULL, NULL }
 };
-
-/*****************************************************************************/
-/**
-*
-* Reads a statistics hardware register and returns the value.
-* 
-*
-* @param [in]	argc   Number of string arguments.
-* @param [in]	argv   Array of strings containg arguments.
-* @param [out]	resp   Pointer to string to place response text in.
-*
-* @return
-*		- 1 if no arguments.
-*		- 0 otherwise.
-*
-******************************************************************************/
-int stats_hw_func(int argc, char **argv, char *resp)
-{
-	int addr;
-	int read = 0;
-	unsigned int value = 0;
-	char *str = resp;
-
-	if (argc == 0)
-	{
-		sprintf(str, "\t%s", STATS_HW_STR);
-		return(1);
-	}
-
-	addr = strtol(argv[0], NULL, 0);
-
-	read = STATS_API_Read_Register(addr, &value);
-	if (!read)
-	{
-		str += sprintf(str, "stats hw: 0x%08x : 0x%08x\n", addr, value);
-	}
-
-	else
-	{
-		str += sprintf(str, "stats hw 0x%08x: /dev/xroe/stats not opened\n", addr);
-	}
-
-	return 0;
-
-}
 
 /*****************************************************************************/
 /**
@@ -468,7 +421,7 @@ int stats_func(int argc, char **argv, char *resp)
 * 
 *
 * @return
-*		- Return value of STATS_API_Read_Register() on error.
+*		- Return value of STATS_SYSFS_API_Read() on error.
 *		- Return value of IP_API_Read_Register() on error.
 *		- Return value of IP_API_Read_Register() otherwise.
 *
@@ -476,59 +429,71 @@ int stats_func(int argc, char **argv, char *resp)
 int stats_update_values(void)
 {
 	int ret = -1;
+	char buff[256];
 
-	ret = STATS_API_Read_Register(STATS_TOTAL_RX_GOOD_PKT_CNT_ADDR, &Stats.TotalPackets.GoodPacketsCount);
+	ret = STATS_SYSFS_API_Read("total_rx_good_pkt", buff);
+	Stats.TotalPackets.GoodPacketsCount = strtoul(buff, NULL, 0);
 	if (!ret)
 	{
-		ret = STATS_API_Read_Register(STATS_TOTAL_RX_BAD_PKT_CNT_ADDR, &Stats.TotalPackets.BadPacketsCount);
+		ret = STATS_SYSFS_API_Read("total_rx_bad_pkt", buff);
+		Stats.TotalPackets.BadPacketsCount = strtoul(buff, NULL, 0);
 	}
 	if (!ret)
 	{
-		ret = STATS_API_Read_Register(STATS_TOTAL_RX_BAD_FCS_CNT_ADDR, &Stats.TotalPackets.PacketsWithBadFCSCount);
-	}
-
-	if (!ret)
-	{
-		ret = STATS_API_Read_Register(STATS_USER_DATA_RX_PACKETS_CNT_ADDR, &Stats.UserPackets.TotalPacketsCount);
-	}
-	if (!ret)
-	{
-		ret = STATS_API_Read_Register(STATS_USER_DATA_RX_GOOD_PKT_CNT_ADDR, &Stats.UserPackets.GoodPacketsCount);
-	}
-	if (!ret)
-	{
-		ret = STATS_API_Read_Register(STATS_USER_DATA_RX_BAD_PKT_CNT_ADDR, &Stats.UserPackets.BadPacketsCount);
-	}
-	if (!ret)
-	{
-		ret = STATS_API_Read_Register(STATS_USER_DATA_RX_BAD_FCS_CNT_ADDR, &Stats.UserPackets.PacketsWithBadFCSCount);
+		ret = STATS_SYSFS_API_Read("total_rx_bad_fcs", buff);
+		Stats.TotalPackets.PacketsWithBadFCSCount = strtoul(buff, NULL, 0);
 	}
 
 	if (!ret)
 	{
-		ret = STATS_API_Read_Register(STATS_USER_CTRL_RX_PACKETS_CNT_ADDR, &Stats.ControlPackets.TotalPacketsCount);
+		ret = STATS_SYSFS_API_Read("total_rx_user_pkt", buff);
+		Stats.UserPackets.TotalPacketsCount = strtoul(buff, NULL, 0);
 	}
 	if (!ret)
 	{
-		ret = STATS_API_Read_Register(STATS_USER_CTRL_RX_GOOD_PKT_CNT_ADDR, &Stats.ControlPackets.GoodPacketsCount);
+		ret = STATS_SYSFS_API_Read("total_rx_good_user_pkt", buff);
+		Stats.UserPackets.GoodPacketsCount = strtoul(buff, NULL, 0);
 	}
 	if (!ret)
 	{
-		ret = STATS_API_Read_Register(STATS_USER_CTRL_RX_BAD_PKT_CNT_ADDR, &Stats.ControlPackets.BadPacketsCount);
+		ret = STATS_SYSFS_API_Read("total_rx_bad_user_pkt", buff);
+		Stats.UserPackets.BadPacketsCount = strtoul(buff, NULL, 0);
 	}
 	if (!ret)
 	{
-		ret = STATS_API_Read_Register(STATS_USER_CTRL_RX_BAD_FCS_CNT_ADDR, &Stats.ControlPackets.PacketsWithBadFCSCount);
+		ret = STATS_SYSFS_API_Read("total_rx_bad_user_fcs", buff);
+		Stats.UserPackets.PacketsWithBadFCSCount = strtoul(buff, NULL, 0);
 	}
 
-
 	if (!ret)
 	{
-		ret = STATS_API_Read_Register(STATS_USER_DATA_RX_PKTS_RATE_ADDR, &Stats.DataPacketsRate);
+		ret = STATS_SYSFS_API_Read("total_rx_user_ctrl_pkt", buff);
+		Stats.ControlPackets.TotalPacketsCount = strtoul(buff, NULL, 0);
 	}
 	if (!ret)
 	{
-		ret = STATS_API_Read_Register(STATS_USER_CTRL_RX_PKTS_RATE_ADDR, &Stats.ControlPacketsRate);
+		ret = STATS_SYSFS_API_Read("total_rx_good_user_ctrl_pkt", buff);
+		Stats.ControlPackets.GoodPacketsCount = strtoul(buff, NULL, 0);
+	}
+	if (!ret)
+	{
+		ret = STATS_SYSFS_API_Read("total_rx_bad_user_ctrl_pkt", buff);
+		Stats.ControlPackets.BadPacketsCount = strtoul(buff, NULL, 0);
+	}
+	if (!ret)
+	{
+		ret = STATS_SYSFS_API_Read("total_rx_bad_user_ctrl_fcs", buff);
+		Stats.ControlPackets.PacketsWithBadFCSCount = strtoul(buff, NULL, 0);
+	}
+	if (!ret)
+	{
+		ret = STATS_SYSFS_API_Read("rx_user_pkt_rate", buff);
+		Stats.DataPacketsRate = strtoul(buff, NULL, 0);
+	}
+	if (!ret)
+	{
+		ret = STATS_SYSFS_API_Read("rx_user_ctrl_pkt_rate", buff);
+		Stats.ControlPacketsRate = strtoul(buff, NULL, 0);
 	}
 
 

@@ -36,20 +36,20 @@ sync
 ## def=Default
 ## doc=Documentation
 ##-----------------------------------------------------------------------------
+                        acc  bof  bwi  aof       def        doc 
+ radio_id            : { ro   0   32  0x0000  0x00120001 'Radio ID tag'}
 
- radio_id            : {acc: ro, bof: 0, bwi: 32, aof: 0x0000, def: 0x00120001, doc: 'Radio ID tag'}
+ gpio_cdc_ledmode2   : { rw   0   1   0x0010  0          'Enable LED mode 2'}
+ gpio_cdc_ledgpio    : { rw   4   2   0x0010  0          'Set LED'}
+ gpio_cdc_dipstatus  : { ro   0   8   0x0014  0          'Read DIP signal status'}
 
- gpio_cdc_ledmode2   : {acc: rw  bof: 0, bwi: 1,  aof: 0x0010, def: 0,          doc: 'Enable LED mode 2'}
- gpio_cdc_ledgpio    : {acc: rw  bof: 4, bwi: 2,  aof: 0x0010, def: 0,          doc: 'Set LED'}
- gpio_cdc_dipstatus  : {acc: ro, bof: 0, bwi: 8,  aof: 0x0014, def: 0,          doc: 'Read DIP signal status'}
-
- radio_source_enable : {acc: rw  bof: 0, bwi: 1,  aof: 0x002C, def: 1,          doc: 'Enable the radio generator'}
- radio_sink_enable   : {acc: rw  bof: 1, bwi: 1,  aof: 0x002C, def: 1,          doc: 'Enable the radio error check mechanism'}
+ radio_source_enable : { rw   0   1   0x002C  1          'Enable the radio generator'}
+ radio_sink_enable   : { rw   1   1   0x002C  1          'Enable the radio error check mechanism'}
  
- app_scratch_reg_0   : {acc: rw, bof: 0, bwi: 16, aof: 0x0050, def: 0,          doc: 'Application message passing reg'}
- app_scratch_reg_1   : {acc: rw, bof: 0, bwi: 16, aof: 0x0054, def: 0,          doc: 'Application message passing reg'}
- app_scratch_reg_2   : {acc: rw, bof: 0, bwi: 16, aof: 0x0058, def: 0,          doc: 'Application message passing reg'}
- app_scratch_reg_3   : {acc: rw, bof: 0, bwi: 16, aof: 0x005C, def: 0,          doc: 'Application message passing reg'}
+ app_scratch_reg_0   : { rw   0   16  0x0050  0          'Application message passing reg'}
+ app_scratch_reg_1   : { rw   0   16  0x0054  0          'Application message passing reg'}
+ app_scratch_reg_2   : { rw   0   16  0x0058  0          'Application message passing reg'}
+ app_scratch_reg_3   : { rw   0   16  0x005C  0          'Application message passing reg'}
 
 ##-----------------------------------------------------------------------------
 ## ZCU102 DIP Switches (PL_DIP SW13)
@@ -99,6 +99,21 @@ LED :        Mode 1          :        Mode 2
 xroe-app -help
 
 ##-----------------------------------------------------------------------------
+## Finding drivers, memory addr range and interface names
+##-----------------------------------------------------------------------------
+## Memory location
+cat /proc/iomem | grep framer
+## Find drivers
+find /sys | grep drivers.* | grep ethernet
+## Driver and IF is using
+basename $(readlink  -f /sys/class/net/eth0/device/driver)
+## Cross reference with 
+ip addr
+## Check the sysfs layout
+find /sys/kernel/xroe
+find /sys/kernel/xtraffic
+
+##-----------------------------------------------------------------------------
 ## PTP
 ##-----------------------------------------------------------------------------
 ##  Starting the Master
@@ -124,3 +139,4 @@ sync
 ##-----------------------------------------------------------------------------
 tail –n 50 /var/log/messages -f
 watch -n 1 " ifconfig | grep 'X packets' ; devmem 0xa000c000 ; devmem 0xa000c004 ; devmem 0xa000c008 ; devmem 0xa000c00c;"
+

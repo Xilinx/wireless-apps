@@ -25,11 +25,6 @@
 #define STATS_HELP_STR "generates this list of commands\n"
 
 /**
- * STATS_HW_STR Help text for the stats module "hw" option.
- */
-#define STATS_HW_STR "\"stats hw <address>\". Reads statistic at address\n"
-
-/**
  * STATS_SW_STR Help text for the stats module "sw" option.
  */
 #define STATS_SW_STR "Software statistics not supported\n"

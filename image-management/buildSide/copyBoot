@@ -1,0 +1,50 @@
+############################################################################
+# Some simple setup variables
+############################################################################
+set TAG="roe_om0_mymods1_"
+set STORE="/home/${USER}/BOOTBINSTORE"
+set BINPATH="./images/linux"
+set CREATIONTIME=`date --utc +%Y%m%d_%H%M%S`
+
+############################################################################
+# Alow TAG modification through command line
+############################################################################
+if ( $1 != "" ) then
+   echo "Setting $TAG to $1"
+   set TAG=$1
+endif
+
+############################################################################
+# Alow STORE modification through command line
+############################################################################
+if ( $2 != "" ) then
+   echo "Setting $STORE to $2"
+   set STORE=$2
+endif
+
+############################################################################
+# Some simple setup variables
+############################################################################
+set DEST=$STORE/${TAG}${CREATIONTIME}
+
+############################################################################
+# check and make your store directory
+############################################################################
+if ( ! -d $STORE ) then
+   mkdir $STORE
+else 
+   echo "Store exists not recreating @ $STORE"
+endif
+
+# make a date_time tagged directory to copy files into
+mkdir $DEST
+
+# Copy the BOOT.bin to your local space
+cp ${BINPATH}/BOOT.BIN $DEST/BOOT.bin
+cp ${BINPATH}/image.ub $DEST/image.ub
+
+echo "##### CONTENT OF $DEST"
+ls -la $DEST
+############################################################################
+# DONE
+############################################################################

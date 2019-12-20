@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <sys/fcntl.h>
 #include <netinet/in.h>
+#include <syslog.h>
 
 #include <client.h>
 #include <comms.h>
@@ -97,9 +98,16 @@ int client_send_message(in_addr_t addr, int port, char *command)
 	bzero(buffer, MAX_RESPONSE_LENGTH);
 
 	/* Send message to daemon and read response */
-	write(sockfd, command, strlen(command));
+	if (write(sockfd, command, strlen(command)) < 0 ) 
+    {
+      syslog(LOG_ERR, "Failed write to Send message to daemon\n");
+    }
+
 	n = read(sockfd, buffer, MAX_RESPONSE_LENGTH);
-	write(1, buffer, n);
+	if(write(1, buffer, n) < 0)
+    {
+      syslog(LOG_ERR, "Failed write to Send message to daemon\n");
+    }
 	close(sockfd);
 
 	return 0;

@@ -1,17 +1,17 @@
 # RoE framer BSPs
 
-Build instructions:
+Build instructions (adapt for correct Petalinux version):
 
 To build the Xilinx Radio over Ethernet Framer Petalinux project you will need the following installed on your build machine:
-- Petalinux 2018.3
-- This BSP (xroe_framer_demo_2018_3.bsp)
+- Petalinux 20XX.X
+- A BSP (zcuXXX_omX.bsp)
 
 Set up the Petalinux environment with the following command:
     source <petalinux_directory>/settings.csh
 
 Build the project with the following commands:
 
-    petalinux-create -t project -n <PROJECT_DIR_NAME> -s xroe_framer_demo_2018_3.bsp
+    petalinux-create -t project -n <PROJECT_DIR_NAME> -s zcuXXX_omX.bsp
 
 This will create a directory called <PROJECT_DIR_NAME> in the current directory populated with the BSP and ready to build.
 
@@ -24,7 +24,7 @@ This will create a PetaLinux image: <PROJECT_DIR_NAME>/images/linux/image.ub
 
 This will create a bootloader image: <PROJECT_DIR_NAME>/images/linux/BOOT.BIN
 
-Copy these two files to the root directory of an SD card and place in the SD card socket of the ZCU102 board.
+Copy these two files to the root directory of an SD card and place in the SD card socket of the zcuXXX board.
 
 ## Xilinx ROE_Framer Address Space
 

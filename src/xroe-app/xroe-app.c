@@ -70,6 +70,10 @@
 #include <xroefram_str.h>
 #include <parser.h>
 
+#include "xroe_api.h"
+
+int radio_ctrl_update_values(void);
+
 
 /**
  * PID_FILE The full name of the file containing the application process id.
@@ -83,14 +87,14 @@ char pid_path[30];
 *
 * Daemonises the application if requested at startup.
 *
-* @param [in]	port   Port to open (if not default)
+* @param [in]  port   Port to open (if not default)
 ******************************************************************************/
 static void skeleton_daemon(int port)
 {
     pid_t pid, sid;
-	int fd;
-	char pid_str[20];
-	
+  int fd;
+  char pid_str[20];
+  
     /* Fork off the parent process */
     pid = fork();
 
@@ -125,18 +129,18 @@ static void skeleton_daemon(int port)
     /* Set new file permissions */
     umask(0);
 
-	/* Create a new SID for the child process */
-	sid = setsid();
-	if (sid < 0) {
-		/* Log the failure */
-		exit(EXIT_FAILURE);
-	}
-	
-	/* Change the current working directory */
-	if ((chdir("/")) < 0) {
-		/* Log the failure */
-		exit(EXIT_FAILURE);
-	}
+  /* Create a new SID for the child process */
+  sid = setsid();
+  if (sid < 0) {
+    /* Log the failure */
+    exit(EXIT_FAILURE);
+  }
+  
+  /* Change the current working directory */
+  if ((chdir("/")) < 0) {
+    /* Log the failure */
+    exit(EXIT_FAILURE);
+  }
 
     /* Close all open file descriptors */
     int x;
@@ -147,27 +151,32 @@ static void skeleton_daemon(int port)
 
     /* Open the log file */
     openlog ("xroe-appd", LOG_PID, LOG_DAEMON);
-	
-	pid = getpid();
-	if(port)
-	{
-		sprintf(pid_path, "/var/run/xroe%d.pid", port);
-	}
-	else
-	{
-		sprintf(pid_path, PID_FILE);
-	}
-	/* Try and create the pidfile */
-	if((fd = open(pid_path, O_CREAT | O_EXCL | O_CLOEXEC | O_RDWR, S_IWUSR | S_IRUSR | S_IROTH)) < 0)
-	{
-		syslog(LOG_ERR, "Failed to create pidfile @ /var/run/xroe.pid, is there another daemon running?\n");
-		exit(EXIT_FAILURE);
-	}
+  
+  pid = getpid();
+  if(port)
+  {
+    sprintf(pid_path, "/var/run/xroe%d.pid", port);
+  }
+  else
+  {
+    sprintf(pid_path, PID_FILE);
+  }
+  /* Try and create the pidfile */
+  if((fd = open(pid_path, O_CREAT | O_EXCL | O_CLOEXEC | O_RDWR, S_IWUSR | S_IRUSR | S_IROTH)) < 0)
+  {
+    syslog(LOG_ERR, "Failed to create pidfile @ /var/run/xroe.pid, is there another daemon running?\n");
+    exit(EXIT_FAILURE);
+  }
 
-	/* Write the pid to the pidfile and close it */
-	sprintf(pid_str, "%d", pid);
-	write(fd, pid_str, strlen(pid_str));
-	close(fd);
+  /* Write the pid to the pidfile and close it */
+  sprintf(pid_str, "%d", pid);
+
+  if((write(fd, pid_str, strlen(pid_str))) < 0)
+  {
+    syslog(LOG_ERR, "Failed to write to  pidfile @ /var/run/xroe.pid\n");
+    exit(EXIT_FAILURE);
+  }
+  close(fd);
 }
 
 /*****************************************************************************/
@@ -186,37 +195,64 @@ static void skeleton_daemon(int port)
 * - p: connect to given remote port (-c) or listen on the given port
 * - c: send command to listening application (UNIX socket by default)
 *
-* @param [in]	argc   Number of command-line arguments (including program name)
-* @param [in]	argv   Array of strings containg command-line arguments
+* @param [in]  argc   Number of command-line arguments (including program name)
+* @param [in]  argv   Array of strings containg command-line arguments
 *
 * @return
-*		- EXIT_SUCCESS on clean exit
-*		- EXIT_FAILURE on start-up error
+*    - EXIT_SUCCESS on clean exit
+*    - EXIT_FAILURE on start-up error
 *
 ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char response[MAX_RESPONSE_LENGTH];
-	char command[MAX_RESPONSE_LENGTH];
-	int quit = 0;
-	int nohw = 0;
-	int daemonise = 0;
-	int send_command = 0;
-	in_addr_t in_addr = 0;
-	int port = 0;
-	int opt;
-	int msg_to_parse = 0;
-	
-	if((argc < 2) || (strcmp(argv[1], "help")==0))
-	{
-		printf(XROE_USAGE_STR);
-		exit(EXIT_FAILURE);
-	}
-	
-    while ((opt = getopt(argc, argv, "dsn:p:c:")) != -1) 
-	{
+  char response[MAX_RESPONSE_LENGTH];
+  char command[MAX_RESPONSE_LENGTH];
+  char eth_port_name[MAX_RESPONSE_LENGTH];
+  int quit = 0;
+  int nohw = 0;
+  int daemonise = 0;
+  int send_command = 0;
+  in_addr_t in_addr = 0;
+  int port = 0;
+  int opt;
+  int msg_to_parse = 0;
+  
+  // Initialise the ethernet 
+  bzero(eth_port_name, sizeof(command));
+  strncpy(eth_port_name, "eth1", MAX_RESPONSE_LENGTH-1);
+
+
+
+  // char buff[256];
+  // int ret;
+
+  // ret = TRAFGEN_SYSFS_API_Read("radio_source_enable", buff);
+  // printf ("Result from Read radio_source_enable %d\n", ret);
+  // printf ("Result from Read radio_source_enable %s\n", buff);
+
+  // ret = TRAFGEN_SYSFS_API_Read("radio_sink_enable", buff);
+  // printf ("Result from Read radio_sink_enable %d\n", ret);
+  // printf ("Result from Read radio_sink_enable %s\n", buff);
+  
+
+
+  // ret = radio_ctrl_update_values();
+  // printf ("Result from Read radio_ctrl_update_values %d\n", ret);
+
+  // return 0;
+
+
+  // get the command arguments
+  if((argc < 2) || (strcmp(argv[1], "help")==0))
+  {
+    printf(XROE_USAGE_STR);
+    exit(EXIT_FAILURE);
+  }
+  
+    while ((opt = getopt(argc, argv, "dsn:p:c:e:")) != -1) 
+  {
         switch (opt) 
-		{
+    {
         case 'd':
             daemonise = 1;
             break;
@@ -227,82 +263,86 @@ int main(int argc, char **argv)
             in_addr = inet_addr(optarg);
             break;
         case 'p':
-			port = atoi(optarg);
-			break;
+            port = atoi(optarg);
+            break;
         case 'c':
             send_command = 1;
-			bzero(command, sizeof(command));
-			strncpy(command, optarg, MAX_RESPONSE_LENGTH-1);
+            bzero(command, sizeof(command));
+            strncpy(command, optarg, MAX_RESPONSE_LENGTH-1);
+            break;
+        case 'e':
+            bzero(eth_port_name, sizeof(eth_port_name));
+            strncpy(eth_port_name, optarg, MAX_RESPONSE_LENGTH-1);
             break;
         default: /* '?' */
-			printf(XROE_USAGE_STR);
+            printf(XROE_USAGE_STR);
             exit(EXIT_FAILURE);
         }
     }
-		 
-	/* Command line client used to talk to daemon */
-	if(send_command)
-	{
-		client_send_message(in_addr, port, command);
-		exit(0);
-	}
+     
+  /* Command line client used to talk to daemon */
+  if(send_command)
+  {
+    client_send_message(in_addr, port, command);
+    exit(0);
+  }
 
-	if(daemonise)
-	{
-		struct stat stat_struct;
-		if(-1 != stat(PID_FILE, &stat_struct))
-		{
-			printf("Pidfile exists, is there another daemon running?\n");
-		}
-		else if(errno != ENOENT)
-		{
-			perror("Error checking Pidfile");
-		}
+  if(daemonise)
+  {
+    struct stat stat_struct;
+    if(-1 != stat(PID_FILE, &stat_struct))
+    {
+      printf("Pidfile exists, is there another daemon running?\nCheck /var/run/xroe.pid\n");
+    }
+    else if(errno != ENOENT)
+    {
+      perror("Error checking Pidfile");
+    }
 
-		skeleton_daemon(port);
-		syslog(LOG_NOTICE, "xroe-app daemon started.");
-	}
-	else if(nohw)
-	{
-		openlog ("xroe-appd", LOG_PID, LOG_USER);
-	}
+    skeleton_daemon(port);
+    syslog(LOG_NOTICE, "xroe-app daemon started.");
+  }
+  else if(nohw)
+  {
+    openlog ("xroe-appd", LOG_PID, LOG_USER);
+  }
  
-	if(open_connections(nohw, port)<0)
-	{
-		syslog(LOG_ERR, "Exiting on connection error\n");
-		exit(EXIT_FAILURE);
-	}
-	
-	while(!quit)
-	{
-		bzero(command, sizeof(command));
-		bzero(response, sizeof(response));
-		
-		msg_to_parse = get_message(nohw, command);
-		if(msg_to_parse == 0)
-		{
-			/* Message already dealt with internally (eCPRI) */
-			continue;
-		}
-		else if(msg_to_parse < 0)
-		{
-			/* Deal with error? */
-			quit = 1;
-		}
-		else if(parse_command(nohw, command, response) < 0)
-		{
-			quit = 1;
-		}
-		else
-		{
-			send_response(response);
-		}
-	}
+  if(open_connections(nohw, port, eth_port_name)<0)
+  {
+    syslog(LOG_ERR, "Exiting on connection error\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  while(!quit)
+  {
+    bzero(command, sizeof(command));
+    bzero(response, sizeof(response));
+    
+    msg_to_parse = get_message(nohw, command);
+    if(msg_to_parse == 0)
+    {
+      /* Message already dealt with internally (eCPRI) */
+      continue;
+    }
+    else if(msg_to_parse < 0)
+    {
+      /* Deal with error? */
+      quit = 1;
+    }
+    else if(parse_command(nohw, command, response) < 0)
+    {
+      quit = 1;
+    }
+    else
+    {
+      send_response(response);
+    }
+  }
  
-	close_connections(nohw);
-    syslog(LOG_NOTICE, "xroe-app terminated.");
-    closelog();
-	unlink(pid_path);
+  close_connections(nohw);
+  syslog(LOG_NOTICE, "xroe-app terminated.");
+  closelog();
+  unlink(pid_path);
     return EXIT_SUCCESS;
 }
 /** @} */

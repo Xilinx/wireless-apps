@@ -21,13 +21,11 @@ int IP_API_Read(int addr, uint8_t *pRead, int length);
 int IP_API_Write(int addr, uint8_t *pWrite, int length);
 int IP_API_Read_Register(int addr, unsigned int *pRead, int Mask, int Offset);
 int IP_API_Write_Register(int addr, unsigned int pWrite, int Mask, int Offset);
-int STATS_API_Read_Register(int addr, unsigned int *pRead);
+int STATS_SYSFS_API_Read(const char *name, char *resp);
 int FRAMER_API_Framer_Restart(int restart);
 int FRAMER_API_Deframer_Restart(int restart);
-int RADIO_CTRL_API_Read(int addr, uint8_t *pRead, int length);
-int RADIO_CTRL_API_Write(int addr, uint8_t *pWrite, int length);
-int RADIO_CTRL_API_Read_Register(int addr, unsigned int *pRead, int Mask, int Offset);
-int RADIO_CTRL_API_Write_Register(int addr, unsigned int value, int Mask, int Offset);
+int TRAFGEN_SYSFS_API_Read(const char *name, char *resp);
+int TRAFGEN_SYSFS_API_Write(const char *name, char *val);
 int XXV_API_Reset(void);
 #endif /* end of protection macro */
 /** @} */

@@ -45,7 +45,7 @@
 #define NUM_LISTEN_SOCKETS 3
 
 /************************** Function Prototypes ******************************/
-int open_connections(int nohw, int port);
+int open_connections(int nohw, int port, char *);
 int get_message(int nohw, char *command);
 void send_response(char *response);
 void close_connections(int nohw);

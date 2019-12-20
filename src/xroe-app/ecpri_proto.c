@@ -654,7 +654,7 @@ int ecpri_owdm_calc_delay(owdm_ts_msg_type *t1, owdm_ts_msg_type *t2, owdm_resul
 		if((res_secs>0) || (res_nsecs>ecpri_report_limit))
 		{
 			/* Hit that ILA here! */
-			RADIO_CTRL_API_Write_Register(0x0020, 1, 0xffffffff, 0);
+			TRAFGEN_SYSFS_API_Write("sw_trigger", "1");
 		}
 	}
 
@@ -849,7 +849,7 @@ int proto_ecpri_handle_incoming_msg(int fd, short revents, char *command)
 * @param [in]	src			IP address of remote node for replies.
 *
 * @return
-*		- return value of RADIO_CTRL_API_Write() or IP_API_Write() on write.
+*		- return value of IP_API_Write() on write.
 *		- -1 on malloc failure.
 *		- 0 on unhandled message type or read success.
 *
@@ -865,7 +865,6 @@ int proto_ecpri_handle_incoming_rma(uint8_t *buffer, uint16_t data_len, int fd, 
 	uint8_t *resp_msg;
 	int resp_len = 0;
 	int retval = 0;
-	int device = 0; /* Default to framer */
 	int ret = 0;
 
 	(void)data_len;
@@ -875,11 +874,6 @@ int proto_ecpri_handle_incoming_rma(uint8_t *buffer, uint16_t data_len, int fd, 
 	id = header->id;
 	length = header->length;
 	addr = header->address[0] | (header->address[1]<<8) | (header->address[2]<<16) | (header->address[3]<<24);
-	if(addr >= 0x30000)
-	{
-		device = 1; /* Radio device requested */
-		addr -= 0x30000;
-	}
 
 	switch(type)
 	{
@@ -890,21 +884,11 @@ int proto_ecpri_handle_incoming_rma(uint8_t *buffer, uint16_t data_len, int fd, 
 			{
 				memset(resp_msg, 0, resp_len);
 				data_ptr = resp_msg + sizeof(ecpri_rma_msg_t);
-				if(device)
+
+				ret = IP_API_Read(addr, data_ptr, length);
+				if(ret)
 				{
-					ret = RADIO_CTRL_API_Read(addr, data_ptr, length);
-					if(ret)
-					{
-						syslog(LOG_ERR, "proto_ecpri_handle_incoming_rma: RADIO_CTRL_API_Read() returned: 0x%x\n", ret);
-					}
-				}
-				else
-				{
-					ret = IP_API_Read(addr, data_ptr, length);
-					if(ret)
-					{
-						syslog(LOG_ERR, "proto_ecpri_handle_incoming_rma: IP_API_Read() returned: 0x%x\n", ret);
-					}
+					syslog(LOG_ERR, "proto_ecpri_handle_incoming_rma: IP_API_Read() returned: 0x%x\n", ret);
 				}
 
 				/* Add RMA header... */
@@ -937,14 +921,7 @@ int proto_ecpri_handle_incoming_rma(uint8_t *buffer, uint16_t data_len, int fd, 
 			resp_msg = malloc(resp_len);
 			if(resp_msg)
 			{
-				if(device)
-				{
-					retval = RADIO_CTRL_API_Write(addr, data_ptr, length);
-				}
-				else
-				{
-					retval = IP_API_Write(addr, data_ptr, length);
-				}
+				retval = IP_API_Write(addr, data_ptr, length);
 
 				/* Add RMA header... */
 				header = (ecpri_rma_msg_t *)resp_msg;

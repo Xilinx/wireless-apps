@@ -1,0 +1,49 @@
+
+
+cfg:
+  boards:
+    zcu111:
+      PART:  "xczu28dr-ffvg1517-2-e"
+      BOARD: "xilinx.com:zcu111:part0:1.2"
+    zcu102:
+      PART:  "xczu9eg-ffvb1156-2-e"
+      BOARD: "xilinx.com:zcu102:part0:3.3"
+
+  ip:
+    om5:
+      CONFIG.Oran_Mode      : 5
+      CONFIG.Axis_Ports_Fram: 1
+      CONFIG.Axis_Ports_Defm: 1
+
+    om5_25:
+      CONFIG.Oran_Mode              : 5
+      CONFIG.Physical_Ethernet_Rate : "25G"
+      CONFIG.Axis_Ports_Fram        : 1
+      CONFIG.Axis_Ports_Defm        : 1
+
+    om0:
+      CONFIG.Oran_Mode      : 0
+      CONFIG.Axis_Ports_Fram: 8
+      CONFIG.Axis_Ports_Defm: 8
+      CONFIG.Fram_Auto_Start: false
+
+    om0_25:
+      CONFIG.Oran_Mode      : 0
+      CONFIG.Physical_Ethernet_Rate : "25G"
+      CONFIG.Axis_Ports_Fram: 8
+      CONFIG.Axis_Ports_Defm: 8
+      CONFIG.Fram_Auto_Start: false
+      
+  ## Flow settings
+  flow:
+    ipName: roe_framer_0
+    ipType: xilinx.com:ip:roe_framer
+    bdName: "design_1"
+
+  ## Block automation settings. 
+  bacfg:
+    cust_repo_ptp:  {CONFIG: {processorSelect: ARM_Linux, ptpSelect: XilinxPtpV1, cfg_addBlFifoReset: 1 }}
+    norm_repo_ptp:           {processorSelect: ARM_Linux, ptpSelect: XilinxPtpV1, cfg_addBlFifoReset: 1 }
+    cust_repo    :  {CONFIG: {processorSelect: ARM_Linux,                         cfg_addBlFifoReset: 1 }}
+    norm_repo    :           {processorSelect: ARM_Linux,                         cfg_addBlFifoReset: 1 }
+

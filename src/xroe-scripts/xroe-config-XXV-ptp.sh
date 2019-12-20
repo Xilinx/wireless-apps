@@ -9,8 +9,14 @@ else
    echo "No last byte given using ${lByte}."
 fi
 
+if [ ! -v $2 ]
+then
+   eTag=$2
+else
+   eTag="eth1"
+fi
+
 ipAddr="192.168.99.${lByte}"
-eTag="eth1"
 
 echo "Setting up the XXV Ethernet link ${eTag} IP= ${ipAddr}"
 ip link set dev ${eTag} up
