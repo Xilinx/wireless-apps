@@ -35,4 +35,4 @@ xroe-help
 ## PetaLinux 
 
 The PetaLinux landing page can be found <a href="https://www.xilinx.com/products/design-tools/embedded-software/petalinux-sdk.html" target="_blank">here</a>.
-The two most commonly used guides are the <a href="https://www.xilinx.com/support/documentation/sw_manuals/xilinx2018_3/ug1144-petalinux-tools-reference-guide.pdf" target="_blank">Reference</a> and <a href="https://www.xilinx.com/support/documentation/sw_manuals/xilinx2018_3/ug1157-petalinux-tools-command-line-guide.pdf" target="_blank">Command Line</a> documents.
+The two most commonly used guides are the <a href="https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf" target="_blank">Reference</a> and <a href="https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1157-petalinux-tools-command-line-guide.pdf" target="_blank">Command Line</a> documents.
