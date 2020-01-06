@@ -385,7 +385,7 @@ proc process_tclargs { argc argv } {
     if { $doimpl == 1 } {
     
       puts "**********************************************************************"
-      puts "Launching Implementation"
+      puts "Launching Implementation, this will take about an hour, with no log to screen."
       set runName [::roe::bin::run_impl]
       puts "**********************************************************************"
       ::roe::bin::reportImplStatus $runName
