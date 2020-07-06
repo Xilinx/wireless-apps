@@ -51,10 +51,9 @@ set_property IOSTANDARD LVCMOS18 [get_ports {gpio_cdc_dipstatus[7]}]
 # Clocks
 #############
 
-# 300 MHz Reference Clock  ( BUT NEED TO PROGRAM DEFAULT 200MHz/100MHz OSCILLATOR OR CHANGE MMCM CONFIG !!! )
-# AM15 Default freq is 100MHz CLOCK INPUT ( BUT NEED TO PROGRAM DEFAULT 100MHz OSCILLATOR ORCHANGE THE MMCM CONFIG !!! )
-set_property PACKAGE_PIN AM15 [get_ports clk_300m_0_clk_p]
-set_property PACKAGE_PIN AN15 [get_ports clk_300m_0_clk_n]
+# 300 MHz Reference Clock
+set_property PACKAGE_PIN J19 [get_ports clk_300m_0_clk_p]
+set_property PACKAGE_PIN J18 [get_ports clk_300m_0_clk_n]
 set_property IOSTANDARD DIFF_HSTL_I_18 [get_ports clk_300m_0_clk_n]
 
 #############
@@ -90,9 +89,3 @@ set_property IOSTANDARD  LVCMOS18    [get_ports "pushbutton_reset"]
 ## ONE PPS placement pin
 set_property PACKAGE_PIN L14         [get_ports {one_pps_0}]
 set_property IOSTANDARD  LVCMOS12    [get_ports {one_pps_0}]
-
-
-set_property PACKAGE_PIN V31 [get_ports si570_in_n ]
-set_property PACKAGE_PIN V32 [get_ports si570_in_p ]
-set_property PACKAGE_PIN Y31 [get_ports si570_out_p]
-set_property PACKAGE_PIN Y32 [get_ports si570_out_n]
