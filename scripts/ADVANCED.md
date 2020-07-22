@@ -51,19 +51,13 @@ can be TCL "sourced" in your own flow and extended to achieve your end design.
 To run all the builds serially in a script, the following sequence can be called.
 ```console
 vivado -mode tcl -source ./xroe_build_vivado.tcl -tclargs zcu102 -tclargs om0    -tclargs implNodateExit
-vivado -mode tcl -source ./xroe_build_vivado.tcl -tclargs zcu102 -tclargs om5    -tclargs implNodateExit
 vivado -mode tcl -source ./xroe_build_vivado.tcl -tclargs zcu111 -tclargs om0    -tclargs implNodateExit
-vivado -mode tcl -source ./xroe_build_vivado.tcl -tclargs zcu111 -tclargs om5    -tclargs implNodateExit
 vivado -mode tcl -source ./xroe_build_vivado.tcl -tclargs zcu111 -tclargs om0_25 -tclargs implNodateExit
-vivado -mode tcl -source ./xroe_build_vivado.tcl -tclargs zcu111 -tclargs om5_25 -tclargs implNodateExit
 ```
 ### Petalinux
 Once complete run the Petalinux builds. Note the **../** is used as Petalinux needs to create a project and cd up and out to get to the XSA directory.
 ```console
-./xroe_build_petalinux.csh om0_z102_0 ../zcu102_om0_2019_2/zcu102_om0_2019_2.sdk zcu102 om0
-./xroe_build_petalinux.csh om5_z102_0 ../zcu102_om5_2019_2/zcu102_om5_2019_2.sdk zcu102 om5
-./xroe_build_petalinux.csh om0_z111_0 ../zcu111_om0_2019_2/zcu111_om0_2019_2.sdk zcu111 om0
-./xroe_build_petalinux.csh om5_z111_0 ../zcu111_om5_2019_2/zcu111_om5_2019_2.sdk zcu111 om5
-./xroe_build_petalinux.csh om0_z111_25g0 ../zcu111_om0_25_2019_2/zcu111_om0_25_2019_2.sdk  zcu111 om0
-./xroe_build_petalinux.csh om5_z111_25g0 ../zcu111_om5_25_2019_2/zcu111_om5_25_2019_2.sdk  zcu111 om5
+./xroe_build_petalinux.csh om0_z102_0    ../zcu102_om0_2019_2/zcu102_om0_2019_2.sdk        zcu102 om0
+./xroe_build_petalinux.csh om0_z111_0    ../zcu111_om0_2019_2/zcu111_om0_2019_2.sdk        zcu111 om0
+./xroe_build_petalinux.csh om0_z111_25g0 ../zcu111_om0_25_2019_2/zcu111_om0_25_2019_2.sdk  zcu111 om0_25g
 ```

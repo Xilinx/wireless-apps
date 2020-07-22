@@ -78,7 +78,7 @@ static void xlnx_tod_read(struct xlnx_ptp_timer *timer, struct timespec64 *ts)
 }
 
 static void xlnx_rtc_offset_write(struct xlnx_ptp_timer *timer,
-          const struct timespec *ts)
+          const struct timespec64 *ts)
 {
 
   out_be32((timer->baseaddr + XTIMER1588_RTC_OFFSET_SEC_H), (u32) ((ts->tv_sec>>32)&0xFFFFFFFF) );
@@ -89,7 +89,7 @@ static void xlnx_rtc_offset_write(struct xlnx_ptp_timer *timer,
 }
 
 static void xlnx_rtc_offset_read(struct xlnx_ptp_timer *timer,
-         struct timespec *ts)
+         struct timespec64 *ts)
 {
   ts->tv_sec  =  in_be32(timer->baseaddr + XTIMER1588_RTC_OFFSET_SEC_H);
   ts->tv_sec  =  (ts->tv_sec<<32);
@@ -182,16 +182,16 @@ static int xlnx_ptp_adjtime(struct ptp_clock_info *ptp, s64 delta)
     ptp_clock_info);
 
   // Declare time structures
-  struct timespec offset, then;
+  struct timespec64 offset, then;
   #ifdef XTIMER1588_ENABLE_DEBUG_MESS
-  struct timespec store;
+  struct timespec64 store;
   #endif
   
   // Get times for reporting
   u32 osec, onsec, nsec, nnsec;
   onsec = in_be32(timer->baseaddr + XTIMER1588_CURRENT_RTC_NS);
   osec = in_be32(timer->baseaddr + XTIMER1588_CURRENT_RTC_SEC_L);
-  then = ns_to_timespec(delta);
+  then = ns_to_timespec64(delta);
   
   // dev_info(timer->dev, "ptp_xlnx_1588:adjtime - delta: %lld\n",delta);
   // dev_info(timer->dev, "ptp_xlnx_1588:adjtime ts.tv_sec:%ld, ts.tv_nsec:%ld\n",then.tv_sec,then.tv_nsec);
@@ -205,7 +205,7 @@ static int xlnx_ptp_adjtime(struct ptp_clock_info *ptp, s64 delta)
         // second field is clear before we add the incoming delta to the offset.
   xlnx_rtc_offset_read(timer, &offset);
   offset.tv_sec = 0;  
-  offset = timespec_add(offset, then);
+  offset = timespec64_add(offset, then);
 
   //dev_info(timer->dev, "ptp_xlnx_1588:adjtime current offset ts.tv_sec:%ld, ts.tv_nsec:%ld\n",offset.tv_sec,offset.tv_nsec);
   // set offset to equal delta (in ns), i.e. the difference between the current reported time and our desired time
@@ -218,8 +218,8 @@ static int xlnx_ptp_adjtime(struct ptp_clock_info *ptp, s64 delta)
   out_be32((timer->baseaddr + XTIMER1588_RTC_OFFSET_SEC_L), (u32) ((offset.tv_sec    ) & 0xffffffff));
   out_be32((timer->baseaddr + XTIMER1588_RTC_OFFSET_NS), offset.tv_nsec );
 
-  // xlnx_rtc_offset_write(timer, (const struct timespec *)&offset);
-  //xlnx_rtc_offset_write(timer, (const struct timespec *)&then);
+  // xlnx_rtc_offset_write(timer, (const struct timespec64 *)&offset);
+  //xlnx_rtc_offset_write(timer, (const struct timespec64 *)&then);
   spin_unlock_irqrestore(&timer->reg_lock, flags);
 
         //xlnx_ptp_gettime(ptp, &jjTemp);
@@ -253,7 +253,7 @@ static int xlnx_ptp_adjtime(struct ptp_clock_info *ptp, s64 delta)
 /**
  * xlnx_ptp_settime - Set the current time on the hardware clock
  * @ptp: ptp clock structure
- * @ts: timespec containing the new time for the cycle counter
+ * @ts: ts timespec64 containing the new time for the cycle counter
  *
  * The seconds register is written first, then the nanosecond
  * The hardware loads the entire new value when a nanosecond register
@@ -265,10 +265,10 @@ static int xlnx_ptp_settime(struct ptp_clock_info *ptp,
   struct xlnx_ptp_timer *timer = container_of(ptp,
     struct xlnx_ptp_timer,
     ptp_clock_info);
-  struct timespec delta, ts_tmp;
+  struct timespec64 delta, ts_tmp;
   struct timespec64 tod;
-  struct timespec tod_non64;
-  struct timespec offset;
+  struct timespec64 tod_non64;
+  struct timespec64 offset;
   unsigned long flags;
 
   ts_tmp.tv_sec = (u32) ts->tv_sec;
@@ -288,8 +288,8 @@ static int xlnx_ptp_settime(struct ptp_clock_info *ptp,
   tod_non64.tv_nsec = (long) tod.tv_nsec;
 
   /* Subtract the current reported time from our desired time */
-  // delta = timespec_sub((struct timespec)*ts, tod);
-  delta = timespec_sub(ts_tmp, tod_non64);
+  // delta = timespec_sub((struct timespec64)*ts, tod);
+  delta = timespec64_sub(ts_tmp, tod_non64);
 
   /* Don't write a negative offset */
   if (delta.tv_sec <= 0) {

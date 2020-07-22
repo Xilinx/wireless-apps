@@ -15,12 +15,17 @@ else
 endif
 
 set DELIVERYDIR=`dirname $THISFILE`
+set mode_is_oran=`echo $MODE | sed -n /om5/p | wc -l`
+
+
 
 petalinux-create --type project --template zynqMP -n $OUPUT_DIR
-cd $OUPUT_DIR/
-petalinux-config --get-hw-description $HDF_DIR --oldconfig
 
-if ("$MODE" == "om5") then
+cd $OUPUT_DIR/
+petalinux-config --get-hw-description $HDF_DIR --silentconfig
+
+#if ("$MODE" == "om5") then
+if ( $mode_is_oran == 1 ) then
 
   echo "xroe: building for OM5 - ORAN mode"
   petalinux-create -t modules -n framer  --enable
@@ -69,9 +74,10 @@ if ("$BOARD" == "zcu111") then
   cat $DELIVERYDIR/../yocto-recipes/meta/system-user_111.dtsi >> ./project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi
 endif
 
-cp -pr $DELIVERYDIR/../yocto-recipes/kernel ./project-spec/meta-user/recipes-kernel
+cp -pr $DELIVERYDIR/../yocto-recipes/kernel/* ./project-spec/meta-user/recipes-kernel
 
-if ("$MODE" == "om5") then
+#if ("$MODE" == "om5") then
+if ( $mode_is_oran == 1 ) then
   sed -i '/CONFIG_XROE_FRAMER/d' ./project-spec/meta-user/recipes-kernel/linux/linux-xlnx/fragment1.cfg
 endif
 
@@ -109,26 +115,28 @@ if ("$BOARD" == "zcu111") then
   echo "xroe: zcu111 support"
   perl -p -i -e 's/^.*CONFIG_SUBSYSTEM_MACHINE_NAME.*/CONFIG_SUBSYSTEM_MACHINE_NAME="zcu111-reva"/' ./project-spec/configs/config
   perl -p -i -e 's/^.*YOCTO_MACHINE_NAME.*/YOCTO_MACHINE_NAME="zcu111-zynqmp"/' ./project-spec/configs/config
-  perl -p -i -e 's/^.*CONFIG_SUBSYSTEM_UBOOT_CONFIG_TARGET.*/CONFIG_SUBSYSTEM_UBOOT_CONFIG_TARGET="xilinx_zynqmp_zcu111_revA_defconfig"/' ./project-spec/configs/config
+  perl -p -i -e 's/^.*CONFIG_SUBSYSTEM_UBOOT_CONFIG_TARGET.*/CONFIG_SUBSYSTEM_UBOOT_CONFIG_TARGET="xilinx_zynqmp_virt_defconfig"/' ./project-spec/configs/config
 endif
 
 if ("$BOARD" == "zcu102") then
   echo "xroe: zcu102 support"
   perl -p -i -e 's/^.*CONFIG_SUBSYSTEM_MACHINE_NAME.*/CONFIG_SUBSYSTEM_MACHINE_NAME="zcu102-rev1.0"/' ./project-spec/configs/config
+  perl -p -i -e 's/^.*YOCTO_MACHINE_NAME.*/YOCTO_MACHINE_NAME="zcu102-zynqmp"/' ./project-spec/configs/config
+  perl -p -i -e 's/^.*CONFIG_SUBSYSTEM_UBOOT_CONFIG_TARGET.*/CONFIG_SUBSYSTEM_UBOOT_CONFIG_TARGET="xilinx_zynqmp_virt_defconfig"/' ./project-spec/configs/config
 endif
 
 echo "xroe: PL Config"
-petalinux-config --oldconfig
+petalinux-config --silentconfig
 
 echo "xroe: PL Build"
 petalinux-build
 
 if ("$BOARD" == "zcu111") then
-  echo "xroe: PL Package, zcu111 FSBL workaround"
-  petalinux-package --boot --fsbl ./../../bsp/2019.2/zcu111_zynqmp_fsbl.elf --fpga ./images/linux/system.bit --pmufw images/linux/pmufw.elf --u-boot --force
+  echo "xroe: PL Package"
+  petalinux-package --boot --fsbl --fpga --pmufw --u-boot --force
 else 
   echo "xroe: PL Package"
-  petalinux-package --boot --fsbl images/linux/zynqmp_fsbl.elf --fpga ./images/linux/system.bit --pmufw images/linux/pmufw.elf --u-boot --force
+  petalinux-package --boot --fsbl --fpga --pmufw --u-boot --force
 endif
 
 echo "xroe: Create BSP one level up."

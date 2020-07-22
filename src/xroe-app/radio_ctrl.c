@@ -299,7 +299,7 @@ int radio_ctrl_radio_id_func(int argc, char **argv, char *resp)
 	read = TRAFGEN_SYSFS_API_Read("radio_id", buff);
 	if(!read)
 	{
-		strncat(str, buff, 255);
+		strncat(str, buff, 256);
 	}
 	else
 	{

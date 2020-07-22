@@ -89,3 +89,9 @@ set_property IOSTANDARD  LVCMOS18    [get_ports "pushbutton_reset"]
 ## ONE PPS placement pin
 set_property PACKAGE_PIN L14         [get_ports {one_pps_0}]
 set_property IOSTANDARD  LVCMOS12    [get_ports {one_pps_0}]
+
+
+set_property PACKAGE_PIN V31 [get_ports si570_in_n ]
+set_property PACKAGE_PIN V32 [get_ports si570_in_p ]
+set_property PACKAGE_PIN Y31 [get_ports si570_out_p]
+set_property PACKAGE_PIN Y32 [get_ports si570_out_n]

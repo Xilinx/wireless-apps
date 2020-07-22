@@ -13,13 +13,6 @@ This script will populate a project directory with a given XROE_framer-based har
 Build output will be in `<project_dir_path>/images/linux/image.ub` (PetaLinux image) and `<project_dir_path>/images/linux/BOOT.BIN` (bootloader image).
 Copy these to the root directory of an SD card and insert the card into the ZCU102 SD card slot to boot the board.
 
-## **Petalinux O-RAN Fronthaul Interface** (Oran_Mode == 5)
-
-To create a project for O-RAN Mode with the latest XRoE Framer driver code (not the included staging driver that comes with the Xilinx Linux kernel), use `om5` as the final argument:
-```console
-xroe_build_petalinux.csh <project_dir_path> <HDF_dir_path> <zcu102|zcu111> <om5>
-```
-
 ## Advanced
 See [ADVANCED.md](ADVANCED.md) for TCL scripting and debug help.
 
@@ -33,6 +26,6 @@ See [ADD_YOUR_BOARD.md](ADD_YOUR_BOARD.md), out of the box boards are shown belo
 | 2018.3 OM0 (10G) | | Y | N |
 | | | |
 | 2019.2 OM0 (10G) | | Y | Y |
-| 2019.2 OM5 (10G) | | Y | Y |
 | 2019.2 OM0 (25G) | | NA | Y |
-| 2019.2 OM5 (25G) | | NA | Y |
+| 2020.1 OM0 (10G) | | Y | Y |
+| 2020.1 OM0 (25G) | | NA | Y |

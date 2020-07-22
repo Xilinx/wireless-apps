@@ -10,25 +10,17 @@ Set up the Petalinux environment with the following command:
     source <petalinux_directory>/settings.csh
 
 Build the project with the following commands:
-```console
-petalinux-create -t project -n <PROJECT_DIR_NAME> -s zcuXXX_omX.bsp
-```
+
+    petalinux-create -t project -n <PROJECT_DIR_NAME> -s zcuXXX_omX.bsp
+
 This will create a directory called <PROJECT_DIR_NAME> in the current directory populated with the BSP and ready to build.
 
-```console
-cd <PROJECT_DIR_NAME>
-petalinux-build
-```
-   
+    cd <PROJECT_DIR_NAME>
+    petalinux-build
+    
 This will create a PetaLinux image: <PROJECT_DIR_NAME>/images/linux/image.ub
 
-```console
-## 2018.3
-petalinux-package --boot --fsbl images/linux/zynqmp_fsbl.elf --fpga ./images/linux/system.bit --pmufw images/linux/pmufw.elf --u-boot --force
-## 2019.2 (zcu111 only)
-petalinux-package --boot --fsbl ../zcu111_zynqmp_fsbl.elf --fpga ./images/linux/system.bit --pmufw images/linux/pmufw.elf --u-boot --force
-
-```
+    petalinux-package --boot --fsbl images/linux/zynqmp_fsbl.elf --fpga ./images/linux/system.bit --pmufw images/linux/pmufw.elf --u-boot --force
 
 This will create a bootloader image: <PROJECT_DIR_NAME>/images/linux/BOOT.BIN
 
