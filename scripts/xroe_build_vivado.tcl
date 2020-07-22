@@ -81,6 +81,13 @@ namespace eval ::roe::data {
 
     }
 
+    if { [get_property CONFIG.LINE_RATE [get_bd_cells /datapath/xxv_eth_subs/xxv_wrap/xxv_ethernet_0]] == 25 } {
+    
+      set_property -dict [list CONFIG.RESYNC_CLK_PERIOD {2560}] [get_bd_cells datapath/xxv_eth_subs/xxv_wrap/support_1588_2step/timer1588_subs/timer_sync_rx]
+      set_property -dict [list CONFIG.RESYNC_CLK_PERIOD {2560}] [get_bd_cells datapath/xxv_eth_subs/xxv_wrap/support_1588_2step/timer1588_subs/timer_sync_tx]
+    
+    }   
+
     if {[regexp {om5} $mode] == 1} {
       ## Add additional xdc constraint for ORAN mode.
       add_files -copy_to ${projectName}/xdc -fileset constrs_1 -force -norecurse constraints/roe_framer_xdc_fifosync.xdc
