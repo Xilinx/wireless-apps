@@ -5,7 +5,7 @@ Software, BSPs etc. for 5G wireless IP and PetaLinux
 The directory structure is:
 - **bsp** Contains PetaLinux BSP files, ready to be built or serve as the starting point for a project.
 - **scripts** Build and configuration scripts to help create a PetaLinux project.
-- **src** Source code for xroe-app, start-up scripts and additional drivers.
+- **src** Source code for the example application **xroe-app**, start-up scripts and additional drivers.
 - **yocto-recipes** Recipes to build the source code into a PetaLinux project.
 
 ## Get started 
