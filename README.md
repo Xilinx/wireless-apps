@@ -5,7 +5,7 @@ Software, BSPs etc. for 5G wireless IP and PetaLinux
 The directory structure is:
 - **bsp** Contains PetaLinux BSP files, ready to be built or serve as the starting point for a project.
 - **scripts** Build and configuration scripts to help create a PetaLinux project.
-- **src** Source code and end-user scripts.
+- **src** Source code for xroe-app, start-up scripts and additional drivers.
 - **yocto-recipes** Recipes to build the source code into a PetaLinux project.
 
 ## Get started 
@@ -31,7 +31,10 @@ Once the system has booted, the default username and password are both **root**.
 ```console
 xroe-help
 ```
-
+Access the example application help using
+```console
+xroe-app -help
+```
 ## PetaLinux 
 
 The PetaLinux landing page can be found <a href="https://www.xilinx.com/products/design-tools/embedded-software/petalinux-sdk.html" target="_blank">here</a>.
