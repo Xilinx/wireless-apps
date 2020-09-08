@@ -144,14 +144,14 @@ else
   petalinux-package --boot --fsbl --fpga --pmufw --u-boot --force
 endif
 
-echo "xroe: Create BSP one level up."
+echo "xroe: Create BSP one level up. (Note. you may need to manually run this with the -force switch)"
 petalinux-package --bsp -p ./ --output ./../${BOARD}_${MODE}.bsp
 
 echo "## Use internal build managment using. Copies BOOT.bin/image.ub your home directory."
 echo ""
 echo "cp ../../image-management/buildSide/copyBoot ."
 echo ""
-echo "## To create a BSP"
+echo "## To create a BSP (Note. You may wish to use the -force switch to overwrite the BSP if it already exists)"
 echo ""
 echo "petalinux-package --bsp -p ./ --output ../../bsp/2019.2/${BOARD}_${MODE}.bsp"
 echo ""
