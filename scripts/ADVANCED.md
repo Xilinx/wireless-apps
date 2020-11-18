@@ -57,7 +57,8 @@ vivado -mode tcl -source ./xroe_build_vivado.tcl -tclargs zcu111 -tclargs om0_25
 ### Petalinux
 Once complete run the Petalinux builds. Note the **../** is used as Petalinux needs to create a project and cd up and out to get to the XSA directory.
 ```console
-./xroe_build_petalinux.csh om0_z102_0    ../zcu102_om0_2020_1/zcu102_om0_2020_1.sdk        zcu102 om0
-./xroe_build_petalinux.csh om0_z111_0    ../zcu111_om0_2020_1/zcu111_om0_2020_1.sdk        zcu111 om0
-./xroe_build_petalinux.csh om0_z111_25g0 ../zcu111_om0_25_2020_1/zcu111_om0_25_2020_1.sdk  zcu111 om0_25g
+./xroe_build_petalinux.csh om0_z102_0    ../zcu102_om0_2020_2/zcu102_om0_2020_2.sdk        zcu102 om0
+./xroe_build_petalinux.csh om0_z111_0    ../zcu111_om0_2020_2/zcu111_om0_2020_2.sdk        zcu111 om0
+./xroe_build_petalinux.csh om0_z111_25g0 ../zcu111_om0_25_2020_2/zcu111_om0_25_2020_2.sdk  zcu111 om0_25g
+
 ```

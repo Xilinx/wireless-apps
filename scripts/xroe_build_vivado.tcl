@@ -1,3 +1,8 @@
+
+
+
+
+
 ## ----------------------------------------------------------------------------
 ## Vivado TCL script to help build ROE Framer Example Systems. 
 ## ----------------------------------------------------------------------------
@@ -57,8 +62,23 @@ namespace eval ::roe::data {
       puts "Call standard block automation"
       apply_bd_automation -rule xilinx.com:bd_rule:roe_framer -config [::roe::bin::get_baSettings norm_repo_ptp] [get_bd_cells ${ipName}]
     }
+    
+    ## Add QPLL fix
+    add_qpll_reset ${ipName}
 
   }
+
+  proc add_qpll_reset { ipName } {
+     
+    create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice /datapath/framer_datapath/xlslice_0
+    set_property -dict [list CONFIG.DIN_TO {1} CONFIG.DIN_FROM {1} CONFIG.DIN_WIDTH {8} CONFIG.DOUT_WIDTH {1}] [get_bd_cells datapath/framer_datapath/xlslice_0]
+    
+    connect_bd_net [get_bd_pins datapath/framer_datapath/xlslice_0/Din]  [get_bd_pins datapath/framer_datapath/${ipName}/user_rw_out]
+    connect_bd_net [get_bd_pins datapath/framer_datapath/xlslice_0/Dout] [get_bd_pins datapath/xxv_eth_subs/xxv_wrap/xxv_ethernet_0/qpllreset_in_0]
+
+  }
+
+
 }
 
 ## Privide another hook to allow constraints, custom user modifications etc

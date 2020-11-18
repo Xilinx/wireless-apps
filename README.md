@@ -3,10 +3,11 @@
 Software, BSPs etc. for 5G wireless IP and PetaLinux
 
 The directory structure is:
+- **src** Source code and end-user scripts.
 - **bsp** Contains PetaLinux BSP files, ready to be built or serve as the starting point for a project.
 - **scripts** Build and configuration scripts to help create a PetaLinux project.
-- **src** Source code for the example application **xroe-app**, start-up scripts and additional drivers.
 - **yocto-recipes** Recipes to build the source code into a PetaLinux project.
+- **image-managment** Build and SDSide Perl script to mange BOOT.bin and image.ub copy and selection.
 
 ## Get started 
 
@@ -31,11 +32,7 @@ Once the system has booted, the default username and password are both **root**.
 ```console
 xroe-help
 ```
-Access the example application help using
-```console
-xroe-app -help
-```
-## PetaLinux 
 
+## PetaLinux 
 The PetaLinux landing page can be found <a href="https://www.xilinx.com/products/design-tools/embedded-software/petalinux-sdk.html" target="_blank">here</a>.
-The two most commonly used guides are the <a href="https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf" target="_blank">Reference</a> and <a href="https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1157-petalinux-tools-command-line-guide.pdf" target="_blank">Command Line</a> documents.
+The two most commonly used guides are the <a href="https://www.xilinx.com/support/documentation/sw_manuals/xilinx2018_3/ug1144-petalinux-tools-reference-guide.pdf" target="_blank">Reference</a> and <a href="https://www.xilinx.com/support/documentation/sw_manuals/xilinx2018_3/ug1157-petalinux-tools-command-line-guide.pdf" target="_blank">Command Line</a> documents.

@@ -74,12 +74,7 @@ if ("$BOARD" == "zcu111") then
   cat $DELIVERYDIR/../yocto-recipes/meta/system-user_111.dtsi >> ./project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi
 endif
 
-if ("$BOARD" == "zcu102") then
-  cp -pr $DELIVERYDIR/../yocto-recipes/kernel/* ./project-spec/meta-user/recipes-kernel/linux/
-endif
-if ("$BOARD" == "zcu111") then
-  cp -pr $DELIVERYDIR/../yocto-recipes/kernel ./project-spec/meta-user/recipes-kernel
-endif
+cp -pr $DELIVERYDIR/../yocto-recipes/kernel/* ./project-spec/meta-user/recipes-kernel/linux/
 
 #if ("$MODE" == "om5") then
 if ( $mode_is_oran == 1 ) then
@@ -144,14 +139,14 @@ else
   petalinux-package --boot --fsbl --fpga --pmufw --u-boot --force
 endif
 
-echo "xroe: Create BSP one level up. (Note. you may need to manually run this with the -force switch)"
+echo "xroe: Create BSP one level up."
 petalinux-package --bsp -p ./ --output ./../${BOARD}_${MODE}.bsp
 
 echo "## Use internal build managment using. Copies BOOT.bin/image.ub your home directory."
 echo ""
 echo "cp ../../image-management/buildSide/copyBoot ."
 echo ""
-echo "## To create a BSP (Note. You may wish to use the -force switch to overwrite the BSP if it already exists)"
+echo "## To create a BSP"
 echo ""
 echo "petalinux-package --bsp -p ./ --output ../../bsp/2019.2/${BOARD}_${MODE}.bsp"
 echo ""
