@@ -74,7 +74,8 @@ if ("$BOARD" == "zcu111") then
   cat $DELIVERYDIR/../yocto-recipes/meta/system-user_111.dtsi >> ./project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi
 endif
 
-cp -pr $DELIVERYDIR/../yocto-recipes/kernel/* ./project-spec/meta-user/recipes-kernel/linux/
+mkdir -p project-spec/meta-user/recipes-kernel/
+cp -pr $DELIVERYDIR/../yocto-recipes/kernel/* ./project-spec/meta-user/recipes-kernel/
 
 #if ("$MODE" == "om5") then
 if ( $mode_is_oran == 1 ) then
