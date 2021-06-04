@@ -22,6 +22,8 @@ set mode_is_oran=`echo $MODE | sed -n /om5/p | wc -l`
 petalinux-create --type project --template zynqMP -n $OUPUT_DIR
 
 cd $OUPUT_DIR/
+echo CONFIG_YOCTO_BUILDTOOLS_EXTENDED=y >> ./project-spec/configs/config
+
 petalinux-config --get-hw-description $HDF_DIR --silentconfig
 
 #if ("$MODE" == "om5") then
@@ -135,19 +137,23 @@ petalinux-build
 if ("$BOARD" == "zcu111") then
   echo "xroe: PL Package"
   petalinux-package --boot --fsbl --fpga --pmufw --u-boot --force
+  petalinux-package --wic --extra-bootfiles "ramdisk.cpio.gz.u-boot"
+  gzip -f images/linux/petalinux-sdimage.wic
 else 
   echo "xroe: PL Package"
   petalinux-package --boot --fsbl --fpga --pmufw --u-boot --force
+  petalinux-package --wic --extra-bootfiles "ramdisk.cpio.gz.u-boot"
+  gzip -f images/linux/petalinux-sdimage.wic
 endif
 
-echo "xroe: Create BSP one level up."
-petalinux-package --bsp -p ./ --output ./../${BOARD}_${MODE}.bsp
+#echo "xroe: Create BSP one level up."
+#petalinux-package --bsp -p ./ --output ./../${BOARD}_${MODE}.bsp
 
-echo "## Use internal build managment using. Copies BOOT.bin/image.ub your home directory."
-echo ""
-echo "cp ../../image-management/buildSide/copyBoot ."
-echo ""
-echo "## To create a BSP"
-echo ""
-echo "petalinux-package --bsp -p ./ --output ../../bsp/2019.2/${BOARD}_${MODE}.bsp"
-echo ""
+#echo "## Use internal build management using. Copies BOOT.bin/image.ub your home directory."
+#echo ""
+#echo "cp ../../image-management/buildSide/copyBoot ."
+#echo ""
+#echo "## To create a BSP"
+#echo ""
+#echo "petalinux-package --bsp -p ./ --output ../../bsp/2019.2/${BOARD}_${MODE}.bsp"
+#echo ""
