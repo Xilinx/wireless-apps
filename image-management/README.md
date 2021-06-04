@@ -7,7 +7,7 @@ SD Side we look for new builds(BOOT.bin image.ub) in this directory and copy the
 
 ## Build Side
 ```console
-../../image-management/buildSide/copyBoot <prefix descriptive tag>_
+../../image-management/buildSide/copyBoot <prefix descriptive tag>
 ```
 
 ## Sd Card Side
