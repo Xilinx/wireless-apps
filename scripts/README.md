@@ -2,6 +2,7 @@
 
 ## **Build Vivado Project in GUI**
 Start vivado choose a supported board/part, place the IP on the IPI canvas and run the Block Automation as detailed in PG312.
+See [ADVANCED.md](ADVANCED.md) for Vivado command line examples.
 
 ## **Petalinux eCPRI/1914 Framer** (Oran_Mode == 0)
 
