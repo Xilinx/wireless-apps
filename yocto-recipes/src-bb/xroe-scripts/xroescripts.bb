@@ -29,7 +29,7 @@ SRC_URI = "file://xroe-config-XXV.sh          \
 ## stripping of and exe which we have likely benn generated with Yocto and are hence
 ## already stripped of debug symbols
 ## https://forums.xilinx.com/t5/Embedded-Linux/adding-pre-built-application-to-roots/td-p/793669
-INSANE_SKIP_${PN} = "ldflags"
+INSANE_SKIP:${PN} = "ldflags"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 INHIBIT_PACKAGE_STRIP = "1"
 

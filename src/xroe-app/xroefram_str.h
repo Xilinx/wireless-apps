@@ -18,7 +18,6 @@
  * XROE_USAGE_STR Help text for the application, listing command line options.
  */
 #define XROE_USAGE_STR "Xilinx Radio Over Ethernet Framer Application (xroe-app)\n" \
-__DATE__ " " __TIME__ "\n" \
 "Usage: <app> [options] [\"command [args]\"]\n" \
 "Options:\n" \
 "  -d daemonise server\n" \

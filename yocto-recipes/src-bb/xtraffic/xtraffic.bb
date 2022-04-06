@@ -11,7 +11,7 @@ SRC_URI = "file://Makefile \
            file://xroe_traffic.c \
            file://xroe_traffic_utils.c \
            file://sysfs_xroe_traffic_config.c \
-      	   file://COPYING \
+           file://COPYING \
           "
 
 S = "${WORKDIR}"

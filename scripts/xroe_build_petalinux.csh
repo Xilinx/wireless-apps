@@ -89,17 +89,17 @@ mkdir project-spec/meta-user/recipes-core
 mkdir project-spec/meta-user/recipes-core/init-ifupdown/
 cp ../../yocto-recipes/src-bb/init-ifupdown/init-ifupdown_%.bbappend ./project-spec/meta-user/recipes-core/init-ifupdown/init-ifupdown_%.bbappend
 
-echo 'IMAGE_INSTALL_append = " linuxptp"' >> ./project-spec/meta-user/conf/petalinuxbsp.conf
+echo 'IMAGE_INSTALL:append = " linuxptp"' >> ./project-spec/meta-user/conf/petalinuxbsp.conf
 
 echo "xroe: Update config files using PERL inline replace, provide scripting resource for test and development"
 perl -p -i -e 's/^# user packages.*\n\K/CONFIG_linuxptp=y\n/' ./project-spec/configs/rootfs_config
-perl -p -i -e 's/^# CONFIG_python.*\n\K/CONFIG_python=y\n/' ./project-spec/configs/rootfs_config
-perl -p -i -e 's/^# CONFIG_python-unittest.*\n\K/CONFIG_python-unittest=y\n/' ./project-spec/configs/rootfs_config
+#perl -p -i -e 's/^# CONFIG_python.*\n\K/CONFIG_python=y\n/' ./project-spec/configs/rootfs_config
+#perl -p -i -e 's/^# CONFIG_python-unittest.*\n\K/CONFIG_python-unittest=y\n/' ./project-spec/configs/rootfs_config
 perl -p -i -e 's/^# CONFIG_perl.*\n\K/CONFIG_perl=y\n/' ./project-spec/configs/rootfs_config
 perl -p -i -e 's/^# CONFIG_perl-lib.*\n\K/CONFIG_perl-lib=y\n/' ./project-spec/configs/rootfs_config
 perl -p -i -e 's/^# CONFIG_netcat.*\n\K/CONFIG_netcat=y\n/' ./project-spec/configs/rootfs_config
 perl -p -i -e 's/^# CONFIG_tcpdump.*\n\K/CONFIG_tcpdump=y\n/' ./project-spec/configs/rootfs_config
-perl -p -i -e 's/^# CONFIG_python-argparse.*\n\K/CONFIG_python-argparse=y\n/' ./project-spec/configs/rootfs_config
+#perl -p -i -e 's/^# CONFIG_python-argparse.*\n\K/CONFIG_python-argparse=y\n/' ./project-spec/configs/rootfs_config
 perl -p -i -e 's/^# CONFIG_git\s.*\n\K/CONFIG_git=y\n/' ./project-spec/configs/rootfs_config
 
 echo "xroe: Enable GCC & G++ on board. Allows easier development for simple C programs"
@@ -134,17 +134,10 @@ petalinux-config --silentconfig
 echo "xroe: PL Build"
 petalinux-build
 
-if ("$BOARD" == "zcu111") then
-  echo "xroe: PL Package"
-  petalinux-package --boot --fsbl --fpga --pmufw --u-boot --force
-  petalinux-package --wic --extra-bootfiles "ramdisk.cpio.gz.u-boot"
-  gzip -f images/linux/petalinux-sdimage.wic
-else 
-  echo "xroe: PL Package"
-  petalinux-package --boot --fsbl --fpga --pmufw --u-boot --force
-  petalinux-package --wic --extra-bootfiles "ramdisk.cpio.gz.u-boot"
-  gzip -f images/linux/petalinux-sdimage.wic
-endif
+echo "xroe: PL Package"
+petalinux-package --boot --fsbl --fpga --pmufw --u-boot --force
+#petalinux-package --wic --extra-bootfiles "ramdisk.cpio.gz.u-boot"
+#gzip -f images/linux/petalinux-sdimage.wic
 
 #echo "xroe: Create BSP one level up."
 #petalinux-package --bsp -p ./ --output ./../${BOARD}_${MODE}.bsp

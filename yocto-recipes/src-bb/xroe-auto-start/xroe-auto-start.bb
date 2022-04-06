@@ -13,8 +13,8 @@ SRC_URI = "file://xroe-auto-start  \
 
 S = "${WORKDIR}"
 
-RDEPENDS_${PN} += "bash"
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+RDEPENDS:${PN} += "bash"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 inherit update-rc.d
 
@@ -28,4 +28,4 @@ do_install() {
    install -m 0755 ${S}/runXroe.bash    ${D}/${bindir}
 }
 
-FILES_${PN} += "${sysconfdir}/*"
+FILES:${PN} += "${sysconfdir}/*"

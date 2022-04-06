@@ -55,10 +55,11 @@ vivado -mode tcl -source ./xroe_build_vivado.tcl -tclargs zcu111 -tclargs om0   
 vivado -mode tcl -source ./xroe_build_vivado.tcl -tclargs zcu111 -tclargs om0_25 -tclargs implNodateExit
 ```
 ### Petalinux
-Once complete run the Petalinux builds. Note the **../** is used as Petalinux needs to create a project and cd up and out to get to the XSA directory.
+Once complete run the Petalinux builds (where "20XX_X" is the release, e.g. 2022.1).
+Note the **../** is used as Petalinux needs to create a project and cd up and out to get to the XSA directory.
 ```console
-./xroe_build_petalinux.csh om0_z102_0    ../zcu102_om0_2021_2/zcu102_om0_2021_2.sdk        zcu102 om0
-./xroe_build_petalinux.csh om0_z111_0    ../zcu111_om0_2021_2/zcu111_om0_2021_2.sdk        zcu111 om0
-./xroe_build_petalinux.csh om0_z111_25g0 ../zcu111_om0_25_2021_2/zcu111_om0_25_2021_2.sdk  zcu111 om0_25g
+./xroe_build_petalinux.csh om0_z102_0    ../zcu102_om0_20XX_X/zcu102_om0_20XX_X.sdk        zcu102 om0
+./xroe_build_petalinux.csh om0_z111_0    ../zcu111_om0_20XX_X/zcu111_om0_20XX_X.sdk        zcu111 om0
+./xroe_build_petalinux.csh om0_z111_25g0 ../zcu111_om0_25_20XX_X/zcu111_om0_25_20XX_X.sdk  zcu111 om0_25g
 
 ```
