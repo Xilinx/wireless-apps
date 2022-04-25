@@ -113,6 +113,10 @@ perl -p -i -e 's/^# CONFIG_libstdcPLUSPLUS\s.*\n\K/CONFIG_libstdcPLUSPLUS=y\n/' 
 echo "xroe: Enable peekpoke"
 perl -p -i -e 's/^# CONFIG_peekpoke.*\n\K/CONFIG_peekpoke=y\n/' ./project-spec/configs/rootfs_config
 
+echo "xroe: Use sysvint Init Manager"
+perl -p -i -e 's/^# CONFIG_Init-manager-sysvinit.*\n\K/CONFIG_Init-manager-sysvinit=y\n/' ./project-spec/configs/rootfs_config
+perl -p -i -e 's/^# CONFIG_Init-manager-systemd.*\n\K/CONFIG_Init-manager-systemd=n\n/' ./project-spec/configs/rootfs_config
+
 ## 
 if ("$BOARD" == "zcu111") then
   echo "xroe: zcu111 support"
